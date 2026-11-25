@@ -1,0 +1,276 @@
+{
+  "schema_version": "1.0.0",
+  "project": {
+    "title": "Faaruun Hin Callisu",
+    "english_title": "The Song Will Not Fall Silent",
+    "logline": "An elderly mother in Dembi Dollo plucks one string on her late son's dusty guitar and hears a new generation singing his melody back through the August rain.",
+    "target_duration_s": 73,
+    "end_card_duration_s": 3,
+    "fps": 24,
+    "narration_language": "om",
+    "subtitle_language": "en"
+  },
+  "design_intent": {
+    "audience": "Oromo youth and diaspora, families from Dembi Dollo and Wallaga, and anyone who carries memory through song.",
+    "viewing_context": "Mobile phones (9:16 vertical in family WhatsApp/Telegram chats and TikTok/Reels) and desktop/festival screening (16:9 horizontal).",
+    "target_feeling": "Quiet grief turning into unbroken pride—realizing a voice can be silenced, but a song outlives the silence."
+  },
+  "style_block": "rich painterly realism, textured charcoal-and-oil animation look, dramatic warm doorway light contrasting cool blue-gray August twilight, muted earth tones, soft 35mm film grain, centered subject framing for 16:9 and 9:16 safe crop, no readable text or watermarks anywhere",
+  "character": {
+    "id": "mother_dembi_dollo",
+    "is_real_person": false,
+    "description": "elderly Oromo woman in her late sixties, deep-lined weathered face, silver-gray hair tucked under a faded cream cotton headscarf, worn dark-brown traditional dress with subtle woven border, thin weathered hands",
+    "reference_seed": 701,
+    "reference_prompts": [
+      "character turnaround portrait, front and three-quarter view, neutral tender expression, soft warm side light, neutral mud-wall background",
+      "medium shot seated on a low wooden stool beside an old acoustic guitar, dramatic warm doorway light"
+    ]
+  },
+  "tts": {
+    "model": "addis",
+    "voice_name": "om-ayyaantuu",
+    "style_instruction": "Speak as a warm, dignified elderly Oromo mother in her late sixties. Female voice only. Slow, unhurried, quiet grief warming into gentle pride at the end. Pause naturally at punctuation.",
+    "languages_to_benchmark": [
+      "om",
+      "am"
+    ]
+  },
+  "music": {
+    "model": "ace-step-1.5",
+    "candidates_per_cue": 3,
+    "selected_seed": 303,
+    "bpm": 68,
+    "key": "A minor",
+    "instrumental": true,
+    "cues": [
+      {
+        "id": "cue_part1_grief",
+        "duration_s": 42,
+        "caption": "sparse solo acoustic guitar underscore, slow, tender, melancholic highland folk texture, soft distant rain ambience, minimal sustained notes, no drums, no strong lead melody, room for voiceover"
+      },
+      {
+        "id": "cue_part2_hope",
+        "duration_s": 42,
+        "caption": "warm acoustic guitar underscore resolving from melancholic A minor to hopeful relative major, gentle distant wordless hum texture, soft rain ambience, tender swell then calm fade, no drums, cinematic score"
+      }
+    ]
+  },
+  "shots": [
+    {
+      "id": "s01",
+      "beat": "establish",
+      "reason": "Anchor place, season, and solitude: August rain in a Dembi Dollo highland home.",
+      "shot_size": "wide",
+      "duration_s": 8,
+      "has_character": false,
+      "motion_engine": "wan2.2",
+      "image_prompt": "dim mud-walled Ethiopian highland room, rain-streaked wooden window on left, one bright open doorway in center-right glowing into misty green rain, low empty wooden stool centered in frame",
+      "motion_prompt": "slow gentle camera push-in, steady August rain falling outside the open doorway, soft shifting mist",
+      "ken_burns": {
+        "zoom_start": 1.0,
+        "zoom_end": 1.08,
+        "pan_x": 0.0,
+        "pan_y": 0.0
+      },
+      "seed": 101,
+      "narration": {
+        "om": "Ammas Hagayya. Roobni Dambi Doolloo akkuma duriiti. Garuu sagaleen kee, kan mana kana ho'isu, hin jiru.",
+        "am": "እንደገና ነሐሴ። የደምቢ ዶሎ ዝናብ እንደ ድሮው ነው። ግን ይህን ቤት ያሞቅ የነበረው ድምፅህ የለም።",
+        "en": "August again. The Dembi Dollo rain hasn't changed—but your voice, the one that warmed this house, is gone."
+      },
+      "music_cue": "rain ambience only, silence before guitar"
+    },
+    {
+      "id": "s02",
+      "beat": "introduce_character",
+      "reason": "Introduce the mother and establish the untouched guitar as the visual symbol of absence.",
+      "shot_size": "medium",
+      "duration_s": 8,
+      "has_character": true,
+      "motion_engine": "wan2.2",
+      "image_prompt": "centered medium shot of the elderly woman sitting quietly on a low wooden stool, an old dusty wooden acoustic guitar leaning against the mud wall right beside her",
+      "motion_prompt": "locked static camera, subtle slow breathing of the elderly woman, soft flicker of natural daylight from doorway",
+      "ken_burns": {
+        "zoom_start": 1.0,
+        "zoom_end": 1.05,
+        "pan_x": 0.0,
+        "pan_y": -0.02
+      },
+      "seed": 102,
+      "narration": {
+        "om": "Gitaarri kee bakkuma ati keessetti hafe. Ribbii ja'a qofaan, weedduu uummata keef falmu ittiin uumte.",
+        "am": "ጊታርህ ባስቀመጥከው ቦታ ቀርቷል። በስድስት ክሮች ብቻ ለሕዝብህ የሚታገሉ ዘፈኖችን ፈጠርክ።",
+        "en": "Your guitar still rests where you left it. With just six strings, you wrote songs that fought for your people."
+      },
+      "music_cue": "single soft acoustic guitar harmonic enters"
+    },
+    {
+      "id": "s03",
+      "beat": "breathe_motif",
+      "reason": "Show his cultural legacy beyond music: teaching children Qubee so they could write their own names.",
+      "shot_size": "insert",
+      "duration_s": 7,
+      "has_character": false,
+      "motion_engine": "ken_burns",
+      "image_prompt": "centered close-up of a dusty wooden acoustic guitar resting beside an open worn exercise notebook and a short piece of white chalk on a low wooden stool, warm dust motes in a dim shaft of doorway light, no legible text",
+      "motion_prompt": "very slow horizontal drift across the guitar strings, dust floating in light",
+      "ken_burns": {
+        "zoom_start": 1.02,
+        "zoom_end": 1.1,
+        "pan_x": 0.03,
+        "pan_y": 0.0
+      },
+      "seed": 103,
+      "narration": {
+        "om": "Ati weellisaa qofa hin turre. Ijoolleen maqaa isaanii akka barreessan, qubee Afaan Oromoo barsiiste.",
+        "am": "አንተ ዘፋኝ ብቻ አልነበርክም። ልጆች ስማቸውን እንዲጽፉ የአፋን ኦሮሞ ፊደል ቁቤን አስተማርክ።",
+        "en": "You weren't only a singer. You taught children Qubee, so they could finally write their own names."
+      },
+      "music_cue": "sparse guitar arpeggio, unhurried"
+    },
+    {
+      "id": "s04",
+      "beat": "memory_object_1",
+      "reason": "Show tangible devotion: preserving a silenced voice on an old cassette tape.",
+      "shot_size": "insert",
+      "duration_s": 8,
+      "has_character": true,
+      "motion_engine": "ken_burns",
+      "image_prompt": "centered overhead close-up of her thin weathered hands gently tracing a faded blank vintage cassette tape resting on a woven cloth",
+      "motion_prompt": "locked camera, weathered fingers slowly glide along the cassette edge",
+      "ken_burns": {
+        "zoom_start": 1.08,
+        "zoom_end": 1.0,
+        "pan_x": 0.0,
+        "pan_y": 0.0
+      },
+      "seed": 104,
+      "narration": {
+        "om": "Namoonni kaaseetii kee dhoksaatti dhaggeeffatu turan. Anis kaaseetii fi dabtara walaloo kee ol kaa'eera.",
+        "am": "ሰዎች ካሴትህን በድብቅ ያዳምጡ ነበር። እኔም ካሴትህንና የግጥም ደብተርህን አስቀምጬዋለሁ።",
+        "en": "People listened to your cassettes in secret. I kept your old tape and notebook of poems safe."
+      },
+      "music_cue": "guitar continues softly underneath voice"
+    },
+    {
+      "id": "s05",
+      "beat": "memory_object_2",
+      "reason": "Connect his craft to language and ink—words that outlived the writer.",
+      "shot_size": "insert",
+      "duration_s": 8,
+      "has_character": true,
+      "motion_engine": "ken_burns",
+      "image_prompt": "centered close-up of an open worn paper notebook with soft out-of-focus blue ink lines and doodles, her wrinkled hand resting gently beside the page in warm light, no legible letters",
+      "motion_prompt": "slow push-in on the aged paper and resting hand, soft dust",
+      "ken_burns": {
+        "zoom_start": 1.0,
+        "zoom_end": 1.09,
+        "pan_x": -0.02,
+        "pan_y": 0.0
+      },
+      "seed": 105,
+      "narration": {
+        "om": "Qalama cuquliisaan jechoota kana barreessite. Gara Finfinnee osoo hin deemin, 'Haadha dhiiraa hin boo'in,' jettee naaf weeddiste.",
+        "am": "እነዚህን ቃላት በሰማያዊ ቀለም ጻፍክ። ወደ ፊንፊኔ ከመሄድህ በፊት 'የጀግና እናት አታልቅሺ' ብለህ ዘፈንክልኝ።",
+        "en": "You wrote these words in blue ink. Before leaving for Finfinnee, you sang to me: 'Mother of a hero, do not weep.'"
+      },
+      "music_cue": "gentle warm chord swell"
+    },
+    {
+      "id": "s06",
+      "beat": "emotional_low",
+      "reason": "The emotional nadir: the heavy silence of August 1996 hanging over the house.",
+      "shot_size": "close-up",
+      "duration_s": 9,
+      "has_character": true,
+      "motion_engine": "wan2.2",
+      "image_prompt": "centered close-up profile of the elderly woman looking out a rain-blurred window into deep blue twilight, soft raindrop shadows cast across her weathered cheek",
+      "motion_prompt": "static locked camera, raindrops slide slowly down the dark window glass, subtle blink",
+      "ken_burns": {
+        "zoom_start": 1.0,
+        "zoom_end": 1.06,
+        "pan_x": 0.0,
+        "pan_y": 0.0
+      },
+      "seed": 106,
+      "narration": {
+        "om": "Garuu Hagayya bara sagaltamii ja'a, rasaasni Finfinneetti sagalee kee dhaabe. Gaafasii as, manni kun waggootaaf callisee hafe.",
+        "am": "ግን በነሐሴ ዘጠና ስድስት በፊንፊኔ ጥይት ድምፅህን አቆመ። ከዚያ ጀምሮ ይህ ቤት ለዓመታት በዝምታ ቀረ።",
+        "en": "Then in August ninety-six, a bullet in Finfinnee silenced you. Since that night, this house has lived in silence."
+      },
+      "music_cue": "score drops out to near-silence and rain"
+    },
+    {
+      "id": "s07",
+      "beat": "the_turn",
+      "reason": "The active pivot: she breaks the silence herself instead of staying passive in grief.",
+      "shot_size": "medium",
+      "duration_s": 8,
+      "has_character": true,
+      "motion_engine": "wan2.2",
+      "image_prompt": "centered medium shot of the elderly woman carefully holding the old wooden guitar across her lap, warm golden rim light from the open doorway illuminating her shoulder and headscarf",
+      "motion_prompt": "slow gentle push-in toward her and the guitar, she gently steadies the wooden neck",
+      "ken_burns": {
+        "zoom_start": 1.0,
+        "zoom_end": 1.08,
+        "pan_x": 0.0,
+        "pan_y": -0.01
+      },
+      "seed": 107,
+      "narration": {
+        "om": "Halkan kana garuu callisuun hin danda'u. Ani weellistuu miti, ilma koo—haadha si yaaddu qofa. Sagalee tokko nan yaala.",
+        "am": "ዛሬ ማታ ግን ዝም ማለት አልችልም። እኔ ዘፋኝ አይደለሁም ልጄ፣ የምናፍቅህ እናት ብቻ ነኝ። አንድ ድምፅ እሞክራለሁ።",
+        "en": "Tonight, I refuse the silence. I am not a singer, my son—only a mother who misses you. I will try one note."
+      },
+      "music_cue": "cue_part2_hope begins gently"
+    },
+    {
+      "id": "s08",
+      "beat": "the_spark",
+      "reason": "Focus on the single physical gesture that reconnects past and present.",
+      "shot_size": "insert",
+      "duration_s": 6,
+      "has_character": true,
+      "motion_engine": "ken_burns",
+      "image_prompt": "centered macro close-up of one weathered fingertip poised on a single worn bronze guitar string over the dark soundhole, warm golden highlight on the metal string",
+      "motion_prompt": "locked camera, finger gently plucks one string, faint vibration",
+      "ken_burns": {
+        "zoom_start": 1.0,
+        "zoom_end": 1.12,
+        "pan_x": 0.0,
+        "pan_y": 0.0
+      },
+      "seed": 108,
+      "narration": {
+        "om": "Ribbii dulloome tokko qofa nan rukkuta. Isaan weellisaa ajjeesan malee, weedduu hin ajjeesne.",
+        "am": "አንድ ያረጀ ክር ብቻ እመታለሁ። ዘፋኙን ገደሉ እንጂ ዘፈኑን አልገደሉም።",
+        "en": "I pluck one worn string. They killed the singer—never the song."
+      },
+      "music_cue": "one clear resonant guitar note rings and lingers"
+    },
+    {
+      "id": "s09",
+      "beat": "emotional_payoff",
+      "reason": "Land the core feeling: grief transforming into tear-bright maternal pride.",
+      "shot_size": "close-up",
+      "duration_s": 8,
+      "has_character": true,
+      "motion_engine": "ken_burns",
+      "image_prompt": "centered intimate close-up of the elderly woman turning slightly toward the bright open doorway, warm golden light catching a quiet proud tear-bright smile on her lined face",
+      "motion_prompt": "very slow push-in, gentle warm glow brightening across her eyes",
+      "ken_burns": {
+        "zoom_start": 1.0,
+        "zoom_end": 1.07,
+        "pan_x": 0.0,
+        "pan_y": -0.01
+      },
+      "seed": 109,
+      "narration": {
+        "om": "Dhaggeeffadhu, ilma koo. Balbala koo duubaan dhaloonni haaraan, kan gaafas hin dhalanne, walaloo kee hundumaa beeka.",
+        "am": "ስማ ልጄ። ከበሬ ጀርባ ያኔ ያልተወለደ አዲስ ትውልድ ግጥምህን ሁሉ ያውቃል።",
+        "en": "Listen, my son. Beyond my doorway, a new generation—not even born back then—knows every word you wrote."
+      },
+      "music_cue": "warm distant hum rises with acoustic guitar"
+    }
+  ]
+}
