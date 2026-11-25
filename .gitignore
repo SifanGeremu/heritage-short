@@ -1,0 +1,166 @@
+# ==========================================
+# AI / ML Model Weights & Checkpoints
+# ==========================================
+# Ignore large binary model files (use Git LFS, HuggingFace Hub, or S3/Cloud instead)
+*.safetensors
+*.ckpt
+*.pt
+*.pth
+*.bin
+*.onnx
+*.pb
+*.h5
+*.hdf5
+*.tflite
+*.mlmodel
+*.gguf
+*.ggml
+*.engine
+*.trt
+
+# Specific framework & hub caches
+.cache/
+huggingface/
+torch_cache/
+models/
+checkpoints/
+weights/
+loras/
+controlnet/
+vae/
+embeddings/
+clip/
+unet/
+diffusers_cache/
+
+# ==========================================
+# Video, Film & Audio Media Assets
+# ==========================================
+# Ignore raw footage, generated renders, and heavy audio/image sequences
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.webm
+*.flv
+*.wmv
+*.mxf
+*.prores
+*.r3d
+*.braw
+*.exr
+*.dpx
+*.tiff
+*.tif
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.wav
+*.mp3
+*.flac
+*.aac
+*.ogg
+
+# Common media pipeline directories
+outputs/
+renders/
+input_media/
+raw_footage/
+datasets/
+frames/
+extracted_frames/
+temp_video/
+stems/
+audio_tracks/
+storyboards/
+
+# Exception: Keep small reference assets or sample workflows if needed
+!assets/samples/*.png
+!assets/samples/*.jpg
+!docs/images/*
+
+# ==========================================
+# ComfyUI, Automatic1111 & Node Pipelines
+# ==========================================
+custom_nodes/
+user/
+temp/
+input/
+output/
+*.autosave.json
+
+# ==========================================
+# Python & Environment Management
+# ==========================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.conda/
+
+# ==========================================
+# Jupyter Notebooks & Experiment Tracking
+# ==========================================
+.ipynb_checkpoints/
+wandb/
+mlruns/
+lightning_logs/
+tensorboard/
+runs/
+*.tfevents*
+
+# ==========================================
+# Secrets, API Keys & Local Configs
+# ==========================================
+# Crucial for multi-model APIs (Runway, Kling, Luma, Sora, ElevenLabs, Replicate, Fal)
+.env*
+!.env.example
+secrets.json
+credentials.json
+api_keys.yaml
+config.local.yaml
+settings.local.json
+*.pem
+*.key
+
+# ==========================================
+# System, IDE & Temp Files
+# ==========================================
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.log
+logs/
+tmp/
+.tmp/
