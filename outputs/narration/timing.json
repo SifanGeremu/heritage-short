@@ -1,0 +1,54 @@
+{
+  "shots": [
+    {
+      "id": "s01",
+      "file": "outputs/narration/s01_3419c1df.wav",
+      "duration_s": 6.03
+    },
+    {
+      "id": "s02",
+      "file": "outputs/narration/s02_f35f333c.wav",
+      "duration_s": 6.44
+    },
+    {
+      "id": "s03",
+      "file": "outputs/narration/s03_beb06888.wav",
+      "duration_s": 6.56
+    },
+    {
+      "id": "s04",
+      "file": "outputs/narration/s04_9ec2ae86.wav",
+      "duration_s": 6.09
+    },
+    {
+      "id": "s05",
+      "file": "outputs/narration/s05_9be698c3.wav",
+      "duration_s": 7.3
+    },
+    {
+      "id": "s06",
+      "file": "outputs/narration/s06_34ae7212.wav",
+      "duration_s": 8.16
+    },
+    {
+      "id": "s07",
+      "file": "outputs/narration/s07_ba4499b9.wav",
+      "duration_s": 7.07
+    },
+    {
+      "id": "s08",
+      "file": "outputs/narration/s08_f7e2593a.wav",
+      "duration_s": 5.94
+    },
+    {
+      "id": "s09",
+      "file": "outputs/narration/s09_b85a3057.wav",
+      "duration_s": 6.9
+    },
+    {
+      "id": "s10",
+      "file": "outputs/narration/s10_3ad6d824.wav",
+      "duration_s": 6.9
+    }
+  ]
+}
