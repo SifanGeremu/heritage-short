@@ -1,0 +1,24 @@
+{
+  "model": "ace-step-1.5",
+  "gpu_minutes": 1.701,
+  "candidates": [
+    {
+      "seed": 301,
+      "file": "outputs/music/music_301.wav",
+      "duration_s": 84.0,
+      "latency_s": 18.373
+    },
+    {
+      "seed": 302,
+      "file": "outputs/music/music_302.wav",
+      "duration_s": 84.0,
+      "latency_s": 13.288
+    },
+    {
+      "seed": 303,
+      "file": "outputs/music/music_303.wav",
+      "duration_s": 84.0,
+      "latency_s": 13.302
+    }
+  ]
+}

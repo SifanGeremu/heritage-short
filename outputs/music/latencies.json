@@ -1,0 +1,20 @@
+{
+  "gpu_minutes": 1.701,
+  "tracks": [
+    {
+      "seed": 301,
+      "file": "music_301.wav",
+      "latency_s": 18.373
+    },
+    {
+      "seed": 302,
+      "file": "music_302.wav",
+      "latency_s": 13.288
+    },
+    {
+      "seed": 303,
+      "file": "music_303.wav",
+      "latency_s": 13.302
+    }
+  ]
+}
