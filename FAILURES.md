@@ -81,13 +81,13 @@ Four defects showed up together on the v1 radio cut. The story was too thin, the
 
 ### Resolution
 
-Storyboard v2 lengthens the narration, sets the Gemini voice to Aoede, and states a female delivery in `tts.style_instruction`. Each generated wav is padded by 250ms in front and 350ms after, with a 15ms fade, and is not trimmed. The radio-cut bed is pink noise low-passed at 1200 Hz at −26 dB. Shot length in the cut is `max(storyboard duration, padded wav + 0.8s)`.
+Storyboard v2 lengthens the narration and states a female delivery in `tts.style_instruction`. The voice that shipped is Addis `om-ayyaantuu`, not Gemini Aoede. Gemini TTS was already failing the language (F-001) and then returned HTTP 429 on the narration quota (F-005). Each generated wav is padded by 250ms in front and 350ms after, with a 15ms fade, and is not trimmed. The radio-cut bed is pink noise low-passed at 1200 Hz at −26 dB. Shot length in the cut is `max(storyboard duration, padded wav + 0.8s)`.
 
 ## F-003. Keyframe s10 stopped by a timeout, then the daily neuron cap
 
 | | |
 | --- | --- |
-| Status | Open for s10. s01–s09 are kept |
+| Status | Closed by dropping s10. s01–s09 are the film |
 | Severity | Blocks the last keyframe until the quota resets |
 | Observed | 25 November 2026 |
 | Component | `pipeline/keyframes.py` |
@@ -102,7 +102,43 @@ The keyframe run got through nine shots. s10 timed out while the service was sti
 ### Actual
 
 s10's call (seed 110, no reference image) logged `status: error` after 145 seconds with `The read operation timed out`. The resume returned HTTP 429: "you have used up your daily free allocation of 10,000 neurons, please upgrade to Cloudflare's Workers Paid plan if you would like to continue usage." No s10 file was saved. s01–s09 stayed on disk and were reported as cached on the second run.
-###Kaggle
-Problem: ACE-Step crashed on import in Kaggle with ValueError: Key backend: 'module://matplotlib_inline.backend_inline' is not a valid value.
-Cause: Kaggle's MPLBACKEND setting isn't valid inside the uv virtual environment.
-Fix: run with MPLBACKEND=Agg.
+
+The storyboard no longer has s10. The closing beat is s09. A narration wav for the deleted shot is still on disk (`s10_3ad6d824.wav`) and is not in the edit.
+
+## F-004. ACE-Step would not import on Kaggle
+
+| | |
+| --- | --- |
+| Status | Fixed |
+| Severity | Blocked the score until the process env was set |
+| Observed | 25 November 2026, Kaggle notebook |
+| Component | `notebooks/music_ace_step.py` |
+| Provider | ACE-Step 1.5 |
+
+Kaggle sets `MPLBACKEND` to `module://matplotlib_inline.backend_inline`. Inside the notebook's uv environment that backend is not a valid matplotlib value, and ACE-Step crashed on import with `ValueError`. The run was repeated with `MPLBACKEND=Agg`. Three instrumentals then completed in 1.701 GPU minutes. Seeds and latencies are in `outputs/music/latencies.json`.
+
+## F-005. Gemini narration quota, and one Addis auth failure
+
+| | |
+| --- | --- |
+| Status | Worked around. The film does not use Gemini audio. |
+| Severity | Blocked the suggested TTS model |
+| Observed | 25 November 2026 |
+| Component | `pipeline/stage_narration.py`, `pipeline/smoke_addis.py` |
+
+Fourteen `gemini-3.8-flash-tts` narration calls between 13:04 and 13:07 UTC returned HTTP 429, "You exceeded your current quota". No wav was written for those attempts. Earlier the same day, one Addis smoke call with `om-bikila` failed with `Authentication is required` (09:29 UTC) before the key was in place. Later Addis calls succeeded.
+
+The workaround is the voice in the film: Addis `om-ayyaantuu`. Gemini stayed in the log as evidence that a 200, and then a 429, both failed to produce a usable Oromo line.
+
+## F-006. Wan 2.2 was never run
+
+| | |
+| --- | --- |
+| Status | Accepted fallback |
+| Severity | The moving-shot stage is stills in motion, not generated video |
+| Observed | Across `runs.jsonl`. No `wan` provider line. |
+| Component | `pipeline/shots.py` |
+
+The brief's video stage is Wan 2.2 image-to-video on Kaggle. This repo did not spend that GPU. After the keyframes existed, `shots.py` turned each jpg into a 24 fps clip with FFmpeg `zoompan`. Four shots in the storyboard still say `motion_engine: wan2.2`. The script does not read that field. It classifies `motion_prompt` into push-in, pull-back, drift, or hold.
+
+This is the fallback the brief allows when video generation is not available. It is not a measured Wan failure. Wan was not given a chance to fail. The trade is recorded in EXPERIMENTS E-008: nine clips in 24 seconds of CPU, and no identity drift inside a clip, because the picture never leaves the keyframe.
