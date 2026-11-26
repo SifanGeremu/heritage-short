@@ -94,6 +94,13 @@ def _report(done: list[str], pending: list[str]) -> None:
     print("remaining:", " ".join(pending) if pending else "(none)")
 
 
+def reference_seed_of(board: dict) -> int:
+    seed = (board.get("character") or {}).get("reference_seed")
+    if isinstance(seed, bool) or not isinstance(seed, int):
+        raise RuntimeError("character.reference_seed must be an integer")
+    return seed
+
+
 def main() -> int:
     board = ensure_storyboard()
     account = read_key("CLOUDFLARE_ACCOUNT_ID")
@@ -109,6 +116,11 @@ def main() -> int:
         return 1
     if not style:
         print("storyboard style_block is empty", file=sys.stderr)
+        return 1
+    try:
+        ref_seed = reference_seed_of(board)
+    except RuntimeError as err:
+        print(err, file=sys.stderr)
         return 1
     shots = board.get("shots") or []
     needs_reference = any(shot.get("has_character") for shot in shots)
@@ -194,6 +206,7 @@ def main() -> int:
                     "height": HEIGHT,
                     "seed": seed,
                     "reference": _rel(REFERENCE) if referenced else None,
+                    "reference_seed": ref_seed if referenced else None,
                 },
                 "seed": seed,
                 "cost": 0,
@@ -388,6 +401,7 @@ def _self_check() -> None:
     assert payload["contents"][0]["parts"][0]["inlineData"]["mimeType"] == "image/jpeg"
     assert _daily_limit("HTTP 429: daily limit reached")
     assert not _daily_limit("HTTP 429: rate limited")
+    assert reference_seed_of({"character": {"reference_seed": 201}}) == 201
     print("self-check ok")
 
 
