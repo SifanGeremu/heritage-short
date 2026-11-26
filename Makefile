@@ -1,4 +1,4 @@
-.PHONY: validate narration radio pipeline reference keyframes shots music assemble film
+.PHONY: validate narration radio pipeline reference keyframes shots music assemble film family
 
 PYTHON ?= .venv/bin/python
 
@@ -29,3 +29,6 @@ assemble:
 	$(PYTHON) pipeline/assemble.py
 
 film: validate narration reference keyframes shots music assemble
+
+family:
+	$(PYTHON) family/server.py
