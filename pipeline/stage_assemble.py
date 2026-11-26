@@ -37,8 +37,17 @@ MAX_LINE_CHARS = 40
 # A3. ponytail: Karplus-Strong, not a recorded guitar. A real sample at
 # outputs/audio/guitar_a3.wav replaces the synth if it is ever added.
 PLUCK_HZ = 220.0
-# 3.3s is the gap after "Just one old string..." in s08_53ff8529.wav. 1.5s sat under the words.
+# Default when the shot cue has no "Ns into". The board's s08 cue is the source.
 PLUCK_AT_S = 3.3
+
+
+def pluck_at_seconds(cue: str, default: float = PLUCK_AT_S) -> float:
+    head = (cue or "").split("s into", 1)[0]
+    token = head.split()[-1] if head.split() else ""
+    try:
+        return float(token)
+    except ValueError:
+        return default
 PLUCK_S = 2.5
 PLUCK_GAIN = 2.0
 
@@ -501,6 +510,7 @@ def plan(board: dict, entries: list) -> tuple[list[dict], list[str], list[str], 
                 "rate": rate,
                 "file": clip,
                 "en": str(narration.get(sub_lang) or "").strip(),
+                "music_cue": str(shot.get("music_cue") or ""),
             }
         )
         cursor += slot
@@ -737,7 +747,7 @@ def render(placed: list[dict], fps: int, dest: Path, runtime: float, srt: Path |
         bed_parts = ["[rain]"]
         next_index = 2 + len(voices)
         if pluck_path is not None:
-            ms = int(round((s08["start_s"] + PLUCK_AT_S) * 1000))
+            ms = int(round((s08["start_s"] + pluck_at_seconds(s08.get("music_cue") or "")) * 1000))
             filters.append(
                 f"[{next_index}:a]aformat=sample_rates=48000:channel_layouts=mono,"
                 f"volume={PLUCK_GAIN},adelay=delays={ms}:all=1[pluck]"
@@ -858,6 +868,8 @@ def _mean_db(path: Path, start: float, length: float) -> float:
 
 
 def _self_check() -> None:
+    assert pluck_at_seconds("one A3 guitar pluck, 3.3s into the shot") == 3.3
+    assert pluck_at_seconds("") == PLUCK_AT_S
     assert slot_for(8, None) == (8, False)
     assert slot_for(8, 3) == (8, False)
     assert slot_for(8, 9.25) == (8, True)

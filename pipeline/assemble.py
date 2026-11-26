@@ -11,6 +11,7 @@ The 16:9 export fits the whole 9:16 frame in the centre. The sides are a
 blurred copy of the same picture, so heads and feet are not cropped away.
 """
 
+import hashlib
 import json
 import subprocess
 import sys
@@ -34,6 +35,7 @@ from stage_assemble import (
     assert_subtitle_coverage,
     chunk_cues,
     cue_windows,
+    pluck_at_seconds,
     write_ass,
     write_pluck,
 )
@@ -45,6 +47,7 @@ TIMING_PATH = ROOT / "outputs" / "narration" / "timing.json"
 WORK = ROOT / "outputs" / "assemble"
 PORTRAIT = ROOT / "outputs" / "film_9x16.mp4"
 LANDSCAPE = ROOT / "outputs" / "film_16x9.mp4"
+STAMP_PATH = WORK / "stamp.json"
 
 WIDTH = 1080
 HEIGHT = 1920
@@ -256,6 +259,30 @@ def ffmpeg(step: str, cmd: list[str], parameters: dict, output: Path | None, *, 
     return proc
 
 
+def inputs_digest(board_text: str, files: list[Path]) -> str:
+    """Storyboard text plus the bytes assemble will read.
+
+    ponytail: a change to this file's mix constants does not bust the stamp.
+    Upgrade path: hash assemble.py and stage_assemble.py into the digest.
+    """
+    digest = hashlib.sha256(board_text.encode())
+    for path in files:
+        digest.update(b"\0")
+        digest.update(path.as_posix().encode())
+        digest.update(path.read_bytes() if path.is_file() else b"missing")
+    return digest.hexdigest()
+
+
+def stamp_matches(digest: str, stamp: Path, outputs: list[Path]) -> bool:
+    if not stamp.is_file() or any(not path.is_file() for path in outputs):
+        return False
+    try:
+        saved = json.loads(stamp.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return False
+    return saved.get("digest") == digest
+
+
 def shot_clip(sid: str) -> Path | None:
     found = [
         path for path in SHOT_DIR.glob(f"{sid}_*.mp4")
@@ -300,6 +327,7 @@ def collect_inputs(board: dict) -> tuple[list[dict], Path, float]:
                 "wav": wav,
                 "wav_s": wav_s,
                 "en": (shot.get("narration") or {}).get("en") or "",
+                "music_cue": str(shot.get("music_cue") or ""),
             }
         )
     seed = board["music"]["selected_seed"]
@@ -526,7 +554,7 @@ def build(
     for shot in placed:
         if shot["id"] == "s08":
             # Source-wav gap, stretched by the same tempo as the voice.
-            pluck_at = shot["start"] + 3.3 / STORY_TEMPO
+            pluck_at = shot["start"] + pluck_at_seconds(shot.get("music_cue") or "") / STORY_TEMPO
             pluck_path = work / "pluck.wav"
             write_pluck(pluck_path)
             break
@@ -558,6 +586,8 @@ def report(path: Path) -> None:
 
 
 def self_check() -> int:
+    assert pluck_at_seconds("one A3 guitar pluck, 3.3s into the shot") == 3.3
+    assert pluck_at_seconds("no timing here") == 3.3
     starts, picture = timeline([8, 8, 7, 8], FADE_S)
     assert starts == [0.0, 7.6, 15.2, 21.8], starts
     assert picture == 29.8
@@ -582,6 +612,27 @@ def self_check() -> int:
     )
     assert cues and all(cue.count("\n") <= 1 for _, _, cue, _sid in cues)
     assert all(len(line) <= 40 for _, _, cue, _sid in cues for line in cue.split("\n"))
+
+    import tempfile
+
+    with tempfile.TemporaryDirectory() as tmp:
+        folder = Path(tmp)
+        left = folder / "a.wav"
+        right = folder / "b.wav"
+        left.write_bytes(b"one")
+        right.write_bytes(b"two")
+        first = inputs_digest("board", [left, right])
+        assert first == inputs_digest("board", [left, right])
+        assert first != inputs_digest("other", [left, right])
+        right.write_bytes(b"three")
+        assert first != inputs_digest("board", [left, right])
+        stamp = folder / "stamp.json"
+        out = folder / "film.mp4"
+        assert stamp_matches(first, stamp, [out]) is False
+        out.write_bytes(b"mp4")
+        stamp.write_text(json.dumps({"digest": first}) + "\n", encoding="utf-8")
+        assert stamp_matches(first, stamp, [out]) is True
+        assert stamp_matches("nope", stamp, [out]) is False
 
     work = WORK / "_check"
     work.mkdir(parents=True, exist_ok=True)
@@ -643,7 +694,20 @@ def main() -> int:
         return self_check()
     board = ensure_storyboard()
     placed, music, end_s = collect_inputs(board)
+    board_text = (ROOT / "storyboard.json").read_text(encoding="utf-8")
+    files = [music, TIMING_PATH]
+    for shot in placed:
+        files.append(shot["clip"])
+        files.append(shot["wav"])
+    digest = inputs_digest(board_text, files)
+    if stamp_matches(digest, STAMP_PATH, [PORTRAIT, LANDSCAPE]):
+        print("assemble cached")
+        report(PORTRAIT)
+        report(LANDSCAPE)
+        return 0
     portrait, landscape = build(placed, music, end_s)
+    WORK.mkdir(parents=True, exist_ok=True)
+    STAMP_PATH.write_text(json.dumps({"digest": digest}) + "\n", encoding="utf-8")
     report(portrait)
     report(landscape)
     return 0
