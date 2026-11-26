@@ -139,6 +139,41 @@ def _parts(data: dict) -> list[dict]:
     return content.get("parts") or []
 
 
+IMAGE_MODEL = "gemini-3.1-flash-image"
+
+
+def image_payload(prompt: str, reference: bytes | None = None) -> dict:
+    parts: list[dict] = []
+    if reference:
+        parts.append(
+            {
+                "inlineData": {
+                    "mimeType": "image/jpeg",
+                    "data": base64.b64encode(reference).decode(),
+                }
+            }
+        )
+    parts.append({"text": prompt})
+    return {
+        "contents": [{"parts": parts}],
+        "generationConfig": {
+            "responseModalities": ["IMAGE"],
+            "imageConfig": {"aspectRatio": "9:16"},
+        },
+    }
+
+
+def generate_image(key: str, model: str, prompt: str, reference: bytes | None = None) -> bytes:
+    data = _generate(key, model, image_payload(prompt, reference), timeout=180)
+    for part in _parts(data):
+        inline = part.get("inlineData") or part.get("inline_data")
+        if inline and inline.get("data"):
+            raw = base64.b64decode(inline["data"])
+            if raw:
+                return raw
+    raise RuntimeError("response had no image")
+
+
 def generate_text(key: str, model: str, prompt: str) -> str:
     data = _generate(
         key,

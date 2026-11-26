@@ -15,6 +15,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from common import ROOT, _daily_limit, fail, read_key, with_retry
 from providers.cloudflare import HEIGHT, KLEIN, WIDTH, generate, image_ext
+from providers.gemini import IMAGE_MODEL, generate_image, image_payload
 from validate import ensure_storyboard
 
 PROVIDER = "cloudflare"
@@ -124,9 +125,12 @@ def main() -> int:
             )
             return 1
 
+    gemini_key = read_key("GEMINI_API_KEY")
     cache = load_cache()
     done: list[str] = []
     pending = [str(shot.get("id")) for shot in shots]
+    # ponytail: Cloudflare first, then Gemini image, then Pollinations when both free quotas are closed.
+    image_via = "cloudflare"
     for shot in shots:
         sid = str(shot.get("id"))
         seed = shot.get("seed")
@@ -152,6 +156,27 @@ def main() -> int:
             cache[digest] = _rel(dest)
             save_cache(cache)
             print(f"{sid}: cached {dest.name}")
+            done.append(sid)
+            pending.remove(sid)
+            continue
+
+        if image_via == "pollinations":
+            if not _pollinations_shot(sid, seed, prompt, digest, dest, cache):
+                _report(done, pending)
+                return 1
+            done.append(sid)
+            pending.remove(sid)
+            continue
+        if image_via == "gemini":
+            if not _gemini_shot(
+                gemini_key, sid, seed, prompt, referenced, digest, dest,
+                reference if referenced else None, cache,
+            ):
+                print(f"{sid}: Gemini image quota closed, using Pollinations flux", file=sys.stderr)
+                image_via = "pollinations"
+                if not _pollinations_shot(sid, seed, prompt, digest, dest, cache):
+                    _report(done, pending)
+                    return 1
             done.append(sid)
             pending.remove(sid)
             continue
@@ -201,14 +226,143 @@ def main() -> int:
 
         if not with_retry(once):
             err = held.get("error")
-            if err is not None and _daily_limit(str(err)):
-                _report(done, pending)
-                return 0
-            return 1
+            if err is None or not _daily_limit(str(err)):
+                return 1
+            # Cloudflare's free day is spent. Gemini Flash Image is the same key's fallback.
+            print(f"{sid}: Cloudflare daily limit, using {IMAGE_MODEL}", file=sys.stderr)
+            image_via = "gemini"
+            if not _gemini_shot(
+                gemini_key, sid, seed, prompt, referenced, digest, dest,
+                reference if referenced else None, cache,
+            ):
+                print(f"{sid}: Gemini image quota closed, using Pollinations flux", file=sys.stderr)
+                image_via = "pollinations"
+                if not _pollinations_shot(sid, seed, prompt, digest, dest, cache):
+                    _report(done, pending)
+                    return 1
         done.append(sid)
         pending.remove(sid)
     print(f"shots {len(done)}/{len(shots)}")
     return 0
+
+
+def _for_pollinations(prompt: str) -> str:
+    """The shot text has to lead. A mother description first makes the boy disappear."""
+    body = prompt.replace(". The woman from image 0", "")
+    try:
+        style, who, image = body.split(". ", 2)
+    except ValueError:
+        return prompt
+    return (
+        f"{image}. Show every person the shot names, the mother and the child together when both are named. "
+        f"{style}. If the mother is in the shot she is: {who}. No watermark and no readable text."
+    )
+
+
+def _pollinations_shot(sid: str, seed: int, prompt: str, digest: str, dest: Path, cache: dict) -> bool:
+    import urllib.error
+    import urllib.parse
+    import urllib.request
+
+    spoken = _for_pollinations(prompt)
+    query = urllib.parse.urlencode(
+        {"width": 768, "height": 1344, "seed": seed, "nologo": "true", "model": "flux"}
+    )
+    url = "https://image.pollinations.ai/prompt/" + urllib.parse.quote(spoken) + "?" + query
+
+    def once():
+        record = {
+            "stage": "keyframes",
+            "provider": "pollinations",
+            "model": "flux",
+            "parameters": {"prompt": spoken, "width": 768, "height": 1344, "seed": seed},
+            "seed": seed,
+            "cost": 0,
+        }
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": "heritage-short"})
+            try:
+                with urllib.request.urlopen(req, timeout=180) as resp:
+                    image = resp.read()
+            except urllib.error.HTTPError as err:
+                if err.code >= 500:
+                    wrapped = RuntimeError(f"HTTP {err.code}: pollinations")
+                    wrapped.code = 503
+                    raise wrapped from None
+                raise
+            if not image.startswith(b"\xff\xd8\xff"):
+                raise RuntimeError("pollinations did not return a jpeg")
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            if dest.exists():
+                raise RuntimeError(f"{_rel(dest)} already exists")
+            dest.write_bytes(image)
+        except Exception as err:
+            fail(err, record, "")
+        record["output_path"] = _rel(dest)
+        record["detail"] = f"{sid}: {dest.name}"
+        cache[digest] = record["output_path"]
+        save_cache(cache)
+        return record
+
+    if with_retry(once):
+        print(f"{sid}: pollinations flux")
+        return True
+    return False
+
+
+def _gemini_shot(
+    key: str,
+    sid: str,
+    seed: int,
+    prompt: str,
+    referenced: bool,
+    digest: str,
+    dest: Path,
+    reference: bytes | None,
+    cache: dict,
+) -> bool:
+    if not key:
+        print("GEMINI_API_KEY is missing from .env", file=sys.stderr)
+        return False
+    held: dict[str, BaseException] = {}
+
+    def once():
+        record = {
+            "stage": "keyframes",
+            "provider": "gemini",
+            "model": IMAGE_MODEL,
+            "parameters": {
+                "prompt": prompt,
+                "aspect": "9:16",
+                "seed": seed,
+                "reference": _rel(REFERENCE) if referenced else None,
+            },
+            "seed": seed,
+            "cost": 0,
+        }
+        try:
+            image = generate_image(key, IMAGE_MODEL, prompt, reference)
+            ext = image_ext(image)
+            path = dest if ext == "jpg" else dest.with_suffix("." + ext)
+            path.parent.mkdir(parents=True, exist_ok=True)
+            if path.exists():
+                raise RuntimeError(f"{_rel(path)} already exists")
+            path.write_bytes(image)
+        except Exception as err:
+            held["error"] = err
+            fail(err, record, key)
+        record["output_path"] = _rel(path)
+        record["detail"] = f"{sid}: {path.name}"
+        cache[digest] = record["output_path"]
+        save_cache(cache)
+        return record
+
+    if with_retry(once):
+        print(f"{sid}: {IMAGE_MODEL}")
+        return True
+    err = held.get("error")
+    print(f"{sid}: {err}", file=sys.stderr)
+    return False
 
 
 def _self_check() -> None:
@@ -219,12 +373,19 @@ def _self_check() -> None:
     bare = shot_prompt(style, who, plain, False)
     used = shot_prompt(style, who, woman, True)
     assert "image 0" not in bare and used.endswith("The woman from image 0")
+    led = _for_pollinations(used)
+    assert led.startswith("the mother seated beside a guitar")
+    assert "image 0" not in led
     ref = b"golden-bytes"
     assert cache_key(used, 102, ref) == cache_key(used, 102, ref)
     assert cache_key(used, 102, ref) != cache_key(used, 103, ref)
     assert cache_key(used, 102, ref) != cache_key(bare, 102, ref)
     assert cache_key(used, 102, ref) != cache_key(used, 102, b"other")
     assert cache_key(bare, 101, None) != cache_key(bare, 101, ref)
+    payload = image_payload("the mother and a painted child", b"jpeg-bytes")
+    assert payload["generationConfig"]["responseModalities"] == ["IMAGE"]
+    assert payload["generationConfig"]["imageConfig"]["aspectRatio"] == "9:16"
+    assert payload["contents"][0]["parts"][0]["inlineData"]["mimeType"] == "image/jpeg"
     assert _daily_limit("HTTP 429: daily limit reached")
     assert not _daily_limit("HTTP 429: rate limited")
     print("self-check ok")

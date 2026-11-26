@@ -29,11 +29,13 @@ from stage_assemble import (
     OUTLINE,
     PAD_LEAD_S,
     PAD_TAIL_S,
-    _ass_time,
     _filter_path,
     _hold_short_cues,
+    assert_subtitle_coverage,
     chunk_cues,
     cue_windows,
+    write_ass,
+    write_pluck,
 )
 from validate import ensure_storyboard
 
@@ -109,50 +111,16 @@ def speech_window(start: float, wav_s: float) -> tuple[float, float]:
     return speech_start, speech_end
 
 
-def caption_cues(placed: list[dict]) -> list[tuple[float, float, str]]:
+def caption_cues(placed: list[dict]) -> list[tuple[float, float, str, str]]:
     cues = []
     for shot in placed:
         text = (shot.get("en") or "").strip()
         if not text:
             continue
         start, end = speech_window(shot["start"], shot["wav_s"])
-        cues.extend(_hold_short_cues(cue_windows(chunk_cues(text), start, end)))
+        for window in _hold_short_cues(cue_windows(chunk_cues(text), start, end)):
+            cues.append((*window, shot.get("id") or ""))
     return cues
-
-
-def write_ass(
-    cues: list[tuple[float, float, str]],
-    dest: Path,
-    play_x: int,
-    play_y: int,
-    font_size: int,
-    margin_x: int,
-    margin_v: int,
-    outline: int,
-) -> None:
-    lines = [
-        "[Script Info]",
-        "ScriptType: v4.00+",
-        f"PlayResX: {play_x}",
-        f"PlayResY: {play_y}",
-        "WrapStyle: 2",
-        "ScaledBorderAndShadow: yes",
-        "",
-        "[V4+ Styles]",
-        "Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, "
-        "Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, "
-        "Alignment, MarginL, MarginR, MarginV, Encoding",
-        f"Style: Default,Liberation Sans,{font_size},&H00FFFFFF,&H000000FF,&H00000000,&H80000000,"
-        f"-1,0,0,0,100,100,0,0,1,{outline},1,2,{margin_x},{margin_x},{margin_v},1",
-        "",
-        "[Events]",
-        "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text",
-    ]
-    for start, end, text in cues:
-        body = text.replace("\\", "").replace("{", "").replace("}", "").replace("\n", r"\N")
-        lines.append(f"Dialogue: 0,{_ass_time(start)},{_ass_time(end)},Default,,0,0,0,,{body}")
-    dest.parent.mkdir(parents=True, exist_ok=True)
-    dest.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
 def video_filter(n: int, durations: list[float], sources: list[float], fade: float, font: str) -> str:
@@ -187,10 +155,11 @@ def video_filter(n: int, durations: list[float], sources: list[float], fade: flo
     return ";".join(parts)
 
 
-def audio_filter(starts: list[float], film: float) -> str:
+def audio_filter(starts: list[float], film: float, pluck_at: float | None = None) -> str:
     """Music is input n, after one narration input per shot.
 
     sidechaincompress attack and release are milliseconds.
+    A pluck, when present, is input n+1 and is not ducked.
     """
     parts = []
     labels = []
@@ -219,8 +188,18 @@ def audio_filter(starts: list[float], film: float) -> str:
         "[bed][voice_sc]sidechaincompress="
         "threshold=0.02:ratio=6:attack=300:release=1500[ducked]"
     )
+    tail = "[voice_mix][ducked]"
+    inputs = 2
+    if pluck_at is not None:
+        ms = max(0, int(round(pluck_at * 1000)))
+        parts.append(
+            f"[{n + 1}:a]aformat=sample_rates=48000:channel_layouts=stereo,"
+            f"volume=2.0,adelay={ms}:all=1,apad=whole_dur={film:.3f}[pluck]"
+        )
+        tail += "[pluck]"
+        inputs = 3
     parts.append(
-        "[voice_mix][ducked]amix=inputs=2:duration=longest:normalize=0:dropout_transition=0,"
+        f"{tail}amix=inputs={inputs}:duration=longest:normalize=0:dropout_transition=0,"
         f"atrim=0:{film:.3f},asetpts=PTS-STARTPTS[aout]"
     )
     return ";".join(parts)
@@ -397,13 +376,27 @@ def write_master(
     )
 
 
-def write_mix(wavs: list[Path], starts: list[float], music: Path, film: float, dest: Path, *, log: bool) -> None:
+def write_mix(
+    wavs: list[Path],
+    starts: list[float],
+    music: Path,
+    film: float,
+    dest: Path,
+    *,
+    log: bool,
+    pluck: Path | None = None,
+    pluck_at: float | None = None,
+) -> None:
     cmd = ["ffmpeg", "-y", "-hide_banner", "-loglevel", "error"]
     for wav in wavs:
         cmd += ["-i", str(wav)]
+    cmd += ["-i", str(music)]
+    if pluck is not None and pluck_at is not None:
+        cmd += ["-i", str(pluck)]
+    else:
+        pluck_at = None
     cmd += [
-        "-i", str(music),
-        "-filter_complex", audio_filter(starts, film),
+        "-filter_complex", audio_filter(starts, film, pluck_at),
         "-map", "[aout]",
         "-c:a", "pcm_s16le", "-ar", "48000",
         str(dest),
@@ -458,8 +451,12 @@ def write_exports(master: Path, audio: Path, cues: list, work: Path, portrait: P
     # not under a centre crop.
     ass_9 = work / "subs_9x16.ass"
     ass_16 = work / "subs_16x9.ass"
-    write_ass(cues, ass_9, WIDTH, HEIGHT, FONT_SIZE, MARGIN_X, MARGIN_V, OUTLINE)
-    write_ass(cues, ass_16, 1920, 1080, 48, 160, 64, 2)
+    write_ass(
+        cues, ass_9,
+        play_x=WIDTH, play_y=HEIGHT, font_size=FONT_SIZE,
+        margin_x=MARGIN_X, margin_v=MARGIN_V, outline=OUTLINE,
+    )
+    write_ass(cues, ass_16, play_x=1920, play_y=1080, font_size=48, margin_x=160, margin_v=64, outline=2)
     video = ["-c:v", "libx264", "-preset", "medium", "-crf", "18", "-pix_fmt", "yuv420p", "-r", str(FPS)]
     audio_args = ["-c:a", "aac", "-b:a", "192k", "-ar", "48000", "-ac", "2"]
     ffmpeg(
@@ -524,12 +521,27 @@ def build(
     film = audio_seconds(master)
     if abs(film - (picture + end_s)) > 0.15:
         print(f"picture length {film:.3f}s, expected {picture + end_s:.3f}s", file=sys.stderr)
-    write_mix([shot["wav"] for shot in placed], starts, music, film, mix, log=log)
+    pluck_at = None
+    pluck_path = None
+    for shot in placed:
+        if shot["id"] == "s08":
+            # Source-wav gap, stretched by the same tempo as the voice.
+            pluck_at = shot["start"] + 3.3 / STORY_TEMPO
+            pluck_path = work / "pluck.wav"
+            write_pluck(pluck_path)
+            break
+    write_mix(
+        [shot["wav"] for shot in placed], starts, music, film, mix,
+        log=log, pluck=pluck_path, pluck_at=pluck_at,
+    )
     measured = measure_loudnorm(mix, log=log)
     print(f"loudnorm in: {measured['input_i']} LUFS, true peak {measured['input_tp']} dB")
     apply_loudnorm(mix, measured, loud, log=log)
     cues = caption_cues(placed)
     write_exports(master, loud, cues, work, portrait, landscape, log=log)
+    end_card_at = film - end_s
+    assert_subtitle_coverage(work / "subs_16x9.ass", placed, end_card_at)
+    assert_subtitle_coverage(work / "subs_9x16.ass", placed, end_card_at)
     for path in (mix, loud, master):
         path.unlink(missing_ok=True)
     return portrait, landscape
@@ -568,8 +580,8 @@ def self_check() -> int:
     cues = caption_cues(
         [{"en": "August again. The Dembi Dollo rain hasn't changed, but your voice is gone.", "start": 0.0, "wav_s": 6.0}]
     )
-    assert cues and all(cue.count("\n") <= 1 for _, _, cue in cues)
-    assert all(len(line) <= 48 for _, _, cue in cues for line in cue.split("\n"))
+    assert cues and all(cue.count("\n") <= 1 for _, _, cue, _sid in cues)
+    assert all(len(line) <= 40 for _, _, cue, _sid in cues for line in cue.split("\n"))
 
     work = WORK / "_check"
     work.mkdir(parents=True, exist_ok=True)

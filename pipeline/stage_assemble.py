@@ -33,6 +33,14 @@ PAD_LEAD_S = 0.250
 PAD_TAIL_S = 0.350
 FADE_S = 0.015
 HOLD_S = 0.8
+MAX_LINE_CHARS = 40
+# A3. ponytail: Karplus-Strong, not a recorded guitar. A real sample at
+# outputs/audio/guitar_a3.wav replaces the synth if it is ever added.
+PLUCK_HZ = 220.0
+# 3.3s is the gap after "Just one old string..." in s08_53ff8529.wav. 1.5s sat under the words.
+PLUCK_AT_S = 3.3
+PLUCK_S = 2.5
+PLUCK_GAIN = 2.0
 
 
 def _rel(path: Path) -> str:
@@ -160,47 +168,127 @@ def _text_width(text: str) -> float:
         return len(text) * FONT_SIZE * 0.62
 
 
-def wrap_lines(text: str) -> list[str]:
-    words = text.replace("\n", " ").split()
-    lines: list[str] = []
-    current = ""
-    for word in words:
-        trial = word if not current else f"{current} {word}"
-        if current and _text_width(trial) > MAX_TEXT_W:
-            lines.append(current)
-            current = word
+def _fits(line: str) -> bool:
+    return len(line) <= MAX_LINE_CHARS and _text_width(line) <= MAX_TEXT_W + 0.5
+
+
+def _clauses(text: str) -> list[str]:
+    """Split on sentence and clause marks. An ellipsis is one mark, not three stops."""
+    parts: list[str] = []
+    buf: list[str] = []
+    i = 0
+    while i < len(text):
+        ch = text[i]
+        if ch == "." and i + 1 < len(text) and text[i + 1] == ".":
+            while i < len(text) and text[i] == ".":
+                buf.append(text[i])
+                i += 1
+            piece = "".join(buf).strip()
+            buf = []
+            if piece:
+                parts.append(piece)
+            continue
+        buf.append(ch)
+        i += 1
+        if ch in ".?!—:,":
+            piece = "".join(buf).strip()
+            buf = []
+            if piece:
+                parts.append(piece)
+    tail = "".join(buf).strip()
+    if tail:
+        parts.append(tail)
+    def _join(left: str, right: str) -> str:
+        right = right.lstrip()
+        if left.endswith("—"):
+            return f"{left}{right}"
+        return f"{left} {right}"
+
+    glued: list[str] = []
+    index = 0
+    while index < len(parts):
+        part = parts[index]
+        if not part.strip(" \"'") and glued:
+            glued[-1] = glued[-1] + part.strip()
+            index += 1
+            continue
+        if len(part.split()) <= 2 and index + 1 < len(parts):
+            parts[index + 1] = _join(part, parts[index + 1])
+            index += 1
+            continue
+        if len(part.split()) <= 2 and glued:
+            glued[-1] = _join(glued[-1], part)
         else:
-            current = trial
+            glued.append(part)
+        index += 1
+    return glued
+
+
+def _wrap_clause(clause: str) -> list[str]:
+    words = clause.split()
+    lines: list[str] = []
+    current: list[str] = []
+    for word in words:
+        trial = " ".join(current + [word])
+        if current and not _fits(trial):
+            lines.append(" ".join(current))
+            current = [word]
+        else:
+            current.append(word)
     if current:
-        lines.append(current)
+        lines.append(" ".join(current))
+    index = 1
+    while index < len(lines):
+        if len(lines[index].split()) > 2 or len(lines[index - 1].split()) <= 3:
+            index += 1
+            continue
+        prev = lines[index - 1].split()
+        nxt = lines[index].split()
+        moved = False
+        while len(nxt) < 3 and len(prev) > 3:
+            trial_prev = " ".join(prev[:-1])
+            trial_next = " ".join([prev[-1], *nxt])
+            if not _fits(trial_prev) or not _fits(trial_next):
+                break
+            nxt.insert(0, prev.pop())
+            moved = True
+        lines[index - 1] = " ".join(prev)
+        lines[index] = " ".join(nxt)
+        if not moved:
+            index += 1
     return lines
 
 
-def _balance(lines: list[str]) -> list[str]:
-    """Pull words down until the two lines are closer, still inside the frame."""
-    if len(lines) != 2:
-        return lines
-    top = lines[0].split()
-    bottom = lines[1].split()
-    while len(top) > 1:
-        trial_bottom = " ".join([top[-1], *bottom])
-        if _text_width(trial_bottom) > MAX_TEXT_W:
-            break
-        trial_top = " ".join(top[:-1])
-        before = abs(_text_width(" ".join(top)) - _text_width(" ".join(bottom)))
-        after = abs(_text_width(trial_top) - _text_width(trial_bottom))
-        if after + 8 >= before:
-            break
-        bottom.insert(0, top.pop())
-    return [" ".join(top), " ".join(bottom)]
-
-
 def chunk_cues(text: str) -> list[str]:
-    """At most two lines, each narrow enough for the 68px caption face."""
-    lines = wrap_lines(text)
-    cues = []
-    for index in range(0, len(lines), 2):
-        cues.append("\n".join(_balance(lines[index:index + 2])))
+    """Clause breaks first. Two lines, 40 characters, no 1–2 word tail cue."""
+    lines: list[str] = []
+    for clause in _clauses(text):
+        lines.extend(_wrap_clause(clause))
+    merged: list[str] = []
+    for line in lines:
+        if merged and _fits(f"{merged[-1]} {line}"):
+            merged[-1] = f"{merged[-1]} {line}"
+        else:
+            merged.append(line)
+    lines = merged
+    cues: list[str] = []
+    index = 0
+    while index < len(lines):
+        take = lines[index:index + 2]
+        words = " ".join(take).split()
+        if len(words) <= 2 and cues:
+            prev = cues[-1].split("\n")
+            orphan = " ".join(take)
+            if len(prev) == 1 and _fits(f"{prev[0]} {orphan}"):
+                cues[-1] = f"{prev[0]} {orphan}"
+            elif len(prev) == 1 and _fits(orphan):
+                cues[-1] = f"{prev[0]}\n{orphan}"
+            else:
+                cues.append("\n".join(take))
+            index += len(take)
+            continue
+        cues.append("\n".join(take))
+        index += len(take)
     return cues
 
 
@@ -235,13 +323,30 @@ def _ass_time(seconds: float) -> str:
     return f"{hours}:{minutes:02d}:{secs:02d}.{cs:02d}"
 
 
-def write_ass(cues: list[tuple[float, float, str]], dest: Path) -> None:
-    """Bottom safe area on a 1080x1920 frame. PlayRes stops libass scaling cues to the top."""
+def _cue(item) -> tuple[float, float, str, str]:
+    if len(item) == 4:
+        return item
+    start, end, text = item
+    return start, end, text, ""
+
+
+def write_ass(
+    cues: list,
+    dest: Path,
+    *,
+    play_x: int = 1080,
+    play_y: int = 1920,
+    font_size: int = FONT_SIZE,
+    margin_x: int = MARGIN_X,
+    margin_v: int = MARGIN_V,
+    outline: int = OUTLINE,
+) -> None:
+    """Bottom safe area. The Name field is the shot id, so a missing shot is visible."""
     lines = [
         "[Script Info]",
         "ScriptType: v4.00+",
-        "PlayResX: 1080",
-        "PlayResY: 1920",
+        f"PlayResX: {play_x}",
+        f"PlayResY: {play_y}",
         "WrapStyle: 2",
         "ScaledBorderAndShadow: yes",
         "",
@@ -249,27 +354,65 @@ def write_ass(cues: list[tuple[float, float, str]], dest: Path) -> None:
         "Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, "
         "Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, "
         "Alignment, MarginL, MarginR, MarginV, Encoding",
-        f"Style: Default,Liberation Sans,{FONT_SIZE},&H00FFFFFF,&H000000FF,&H00000000,&H80000000,"
-        f"-1,0,0,0,100,100,0,0,1,{OUTLINE},1,2,{MARGIN_X},{MARGIN_X},{MARGIN_V},1",
+        f"Style: Default,Liberation Sans,{font_size},&H00FFFFFF,&H000000FF,&H00000000,&H80000000,"
+        f"-1,0,0,0,100,100,0,0,1,{outline},1,2,{margin_x},{margin_x},{margin_v},1",
         "",
         "[Events]",
         "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text",
     ]
-    for start, end, text in cues:
+    for item in cues:
+        start, end, text, sid = _cue(item)
         body = text.replace("\\", "").replace("{", "").replace("}", "").replace("\n", r"\N")
         lines.append(
-            f"Dialogue: 0,{_ass_time(start)},{_ass_time(end)},Default,,0,0,0,,{body}"
+            f"Dialogue: 0,{_ass_time(start)},{_ass_time(end)},Default,{sid},0,0,0,,{body}"
         )
     dest.parent.mkdir(parents=True, exist_ok=True)
     dest.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
-def write_srt(cues: list[tuple[float, float, str]], dest: Path) -> None:
+def write_srt(cues: list, dest: Path) -> None:
     blocks = []
-    for index, (start, end, text) in enumerate(cues, start=1):
+    for index, item in enumerate(cues, start=1):
+        start, end, text, _sid = _cue(item)
         blocks.append(f"{index}\n{_srt_time(start)} --> {_srt_time(end)}\n{text}\n")
     dest.parent.mkdir(parents=True, exist_ok=True)
     dest.write_text("\n".join(blocks), encoding="utf-8")
+
+
+def _ass_seconds(stamp: str) -> float:
+    clock, cs = stamp.strip().split(".")
+    hours, minutes, seconds = clock.split(":")
+    return int(hours) * 3600 + int(minutes) * 60 + int(seconds) + int(cs) / 100.0
+
+
+def assert_subtitle_coverage(path: Path, placed: list[dict], end_card_at: float) -> None:
+    """One subtitle block per non-empty English line, and s10 ends before the end card."""
+    spoken = [shot["id"] for shot in placed if (shot.get("en") or "").strip()]
+    full = {shot["id"]: (shot.get("en") or "").strip() for shot in placed}
+    blocks: list[str] = []
+    s10_end = None
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if not line.startswith("Dialogue:"):
+            continue
+        parts = line.split(":", 1)[1].split(",", 9)
+        sid = parts[4].strip()
+        end = _ass_seconds(parts[2])
+        body = parts[9].replace(r"\N", "\n")
+        rows = body.split("\n")
+        if len(rows) > 2 or any(len(row) > MAX_LINE_CHARS for row in rows):
+            raise SystemExit(f"{_rel(path)}: cue exceeds 2 lines or {MAX_LINE_CHARS} chars: {body!r}")
+        if len(body.replace("\n", " ").split()) <= 2 and len(full.get(sid, "").split()) > 2:
+            raise SystemExit(f"{_rel(path)}: orphan cue {body!r}")
+        if not blocks or blocks[-1] != sid:
+            blocks.append(sid)
+        if sid == "s10":
+            s10_end = end
+    if blocks != spoken:
+        raise SystemExit(f"{_rel(path)}: subtitle blocks {blocks} != narration shots {spoken}")
+    if "s10" in spoken and (s10_end is None or s10_end > end_card_at + 0.05):
+        raise SystemExit(
+            f"{_rel(path)}: s10 ends at {s10_end}s, end card starts at {end_card_at:.3f}s"
+        )
 
 
 def _measured(sid: str, entry: dict, path: Path) -> tuple[float | None, list[str]]:
@@ -411,13 +554,15 @@ def _hold_short_cues(
     return [tuple(cue) for cue in held]
 
 
-def build_cues(placed: list[dict]) -> list[tuple[float, float, str]]:
+def build_cues(placed: list[dict]) -> list[tuple[float, float, str, str]]:
     cues = []
     for shot in placed:
-        if not shot.get("en"):
+        text = (shot.get("en") or "").strip()
+        if not text:
             continue
         start, end = spoken_window(shot)
-        cues.extend(_hold_short_cues(cue_windows(chunk_cues(shot["en"]), start, end)))
+        for window in _hold_short_cues(cue_windows(chunk_cues(text), start, end)):
+            cues.append((*window, shot["id"]))
     return cues
 
 
@@ -433,6 +578,67 @@ def _filter_path(path: Path) -> str:
     return path.as_posix().replace("\\", "\\\\").replace(":", "\\:").replace("'", r"\'")
 
 
+def _write_wav(path: Path, samples: list[float], sr: int = 48000) -> None:
+    import struct
+    import wave
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with wave.open(str(path), "w") as handle:
+        handle.setnchannels(1)
+        handle.setsampwidth(2)
+        handle.setframerate(sr)
+        frames = b"".join(
+            struct.pack("<h", int(max(-1.0, min(1.0, sample)) * 32767))
+            for sample in samples
+        )
+        handle.writeframes(frames)
+
+
+def write_pluck(path: Path, freq: float = PLUCK_HZ, seconds: float = PLUCK_S, sr: int = 48000) -> None:
+    """One warm A3. Decay is a 2.5s ring, not a physical string."""
+    import math
+    import random
+
+    n = max(2, int(round(sr / freq)))
+    rng = random.Random(int(freq))
+    buf = [rng.uniform(-1.0, 1.0) for _ in range(n)]
+    buf = [0.5 * (buf[i] + buf[(i + 1) % n]) for i in range(n)]
+    total = int(sr * seconds)
+    samples = []
+    idx = 0
+    for i in range(total):
+        sample = buf[idx]
+        buf[idx] = 0.5 * (buf[idx] + buf[(idx + 1) % n])
+        idx = (idx + 1) % n
+        attack = min(1.0, i / (0.004 * sr))
+        env = math.exp(-3.0 * i / total)
+        samples.append(sample * attack * env)
+    peak = max(abs(sample) for sample in samples) or 1.0
+    _write_wav(path, [sample / peak * 0.8 for sample in samples], sr)
+
+
+def write_hum(path: Path, seconds: float, sr: int = 48000) -> None:
+    """A-minor chord, the stand-in for cue_part2_hope when the score is not the bed."""
+    import math
+
+    freqs = (110.0, 130.81, 164.81)
+    total = max(1, int(sr * seconds))
+    samples = []
+    for i in range(total):
+        t = i / sr
+        tone = sum(math.sin(2 * math.pi * freq * t) for freq in freqs) / len(freqs)
+        attack = min(1.0, t / 0.35)
+        samples.append(tone * attack)
+    _write_wav(path, samples, sr)
+
+
+def _by_id(placed: list[dict], sid: str) -> dict | None:
+    for shot in placed:
+        if shot["id"] == sid:
+            return shot
+    return None
+
+
 def render(placed: list[dict], fps: int, dest: Path, runtime: float, srt: Path | None = None) -> str | None:
     if not placed:
         return "radio cut: no shots"
@@ -443,6 +649,18 @@ def render(placed: list[dict], fps: int, dest: Path, runtime: float, srt: Path |
         write_srt(cues, srt)
         ass = srt.with_suffix(".ass")
         write_ass(cues, ass)
+        assert_subtitle_coverage(ass, placed, runtime - end_card)
+        if dest.resolve() == OUT_PATH.resolve():
+            work = ROOT / "outputs" / "assemble"
+            subs_9 = work / "subs_9x16.ass"
+            subs_16 = work / "subs_16x9.ass"
+            write_ass(cues, subs_9)
+            write_ass(
+                cues, subs_16,
+                play_x=1920, play_y=1080, font_size=48, margin_x=160, margin_v=64, outline=2,
+            )
+            assert_subtitle_coverage(subs_9, placed, runtime - end_card)
+            assert_subtitle_coverage(subs_16, placed, runtime - end_card)
     missing = []
     voices = []
     for shot in placed:
@@ -456,6 +674,15 @@ def render(placed: list[dict], fps: int, dest: Path, runtime: float, srt: Path |
     if missing:
         return "\n".join(missing)
 
+    s08 = _by_id(placed, "s08")
+    s09 = _by_id(placed, "s09")
+    pluck_path = dest.with_name(dest.stem + ".pluck.wav") if s08 is not None else None
+    hum_path = dest.with_name(dest.stem + ".hum.wav") if s09 is not None else None
+    if pluck_path is not None:
+        write_pluck(pluck_path)
+    if hum_path is not None:
+        write_hum(hum_path, max(0.5, runtime - s09["start_s"]))
+
     cmd = [
         "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
         "-f", "lavfi", "-i", f"color=c=black:s={FRAME}:r={fps}:d={runtime:.3f}",
@@ -464,11 +691,15 @@ def render(placed: list[dict], fps: int, dest: Path, runtime: float, srt: Path |
     ]
     for _shot, path in voices:
         cmd += ["-i", str(path)]
+    if pluck_path is not None:
+        cmd += ["-i", str(pluck_path)]
+    if hum_path is not None:
+        cmd += ["-i", str(hum_path)]
 
     fade_out = max(0.0, runtime - FADE_S)
     filters = [
         f"[1:a]lowpass=f=1200,volume=-26dB,afade=t=in:st=0:d={FADE_S:.3f},"
-        f"afade=t=out:st={fade_out:.3f}:d={FADE_S:.3f}[pad]"
+        f"afade=t=out:st={fade_out:.3f}:d={FADE_S:.3f}[rain]"
     ]
     labels = []
     for index, (shot, _path) in enumerate(voices):
@@ -481,14 +712,65 @@ def render(placed: list[dict], fps: int, dest: Path, runtime: float, srt: Path |
             f"{tempo}asetpts=PTS-STARTPTS,adelay=delays={ms}:all=1,volume=0.9[{label}]"
         )
         labels.append(f"[{label}]")
-    if labels:
-        n = 1 + len(labels)
+    if pluck_path is None and hum_path is None:
+        bed = "[rain]"
+        if labels:
+            n = 1 + len(labels)
+            filters.append(
+                f"{bed}{''.join(labels)}amix=inputs={n}:normalize=0:duration=first:dropout_transition=0[mix]"
+            )
+            audio = "[mix]"
+        else:
+            audio = bed
+    else:
+        if labels:
+            filters.append(
+                f"{''.join(labels)}amix=inputs={len(labels)}:normalize=0:"
+                "duration=longest:dropout_transition=0[voice]"
+            )
+        else:
+            filters.append("anullsrc=r=48000:cl=mono,atrim=0:0.1[voice]")
+        filters.append("[voice]asplit=2[voice_mix][voice_sc_raw]")
         filters.append(
-            f"[pad]{''.join(labels)}amix=inputs={n}:normalize=0:duration=first:dropout_transition=0[mix]"
+            f"[voice_sc_raw]apad=whole_dur={runtime:.3f},atrim=0:{runtime:.3f}[voice_sc]"
+        )
+        bed_parts = ["[rain]"]
+        next_index = 2 + len(voices)
+        if pluck_path is not None:
+            ms = int(round((s08["start_s"] + PLUCK_AT_S) * 1000))
+            filters.append(
+                f"[{next_index}:a]aformat=sample_rates=48000:channel_layouts=mono,"
+                f"volume={PLUCK_GAIN},adelay=delays={ms}:all=1[pluck]"
+            )
+            next_index += 1
+        if hum_path is not None:
+            ms = int(round(s09["start_s"] * 1000))
+            span = max(0.5, runtime - s09["start_s"])
+            filters.append(
+                f"[{next_index}:a]aformat=sample_rates=48000:channel_layouts=mono,"
+                f"volume='0.28+0.45*min(1\\,t/{span:.3f})':eval=frame,"
+                f"adelay=delays={ms}:all=1[hum]"
+            )
+            bed_parts.append("[hum]")
+        if len(bed_parts) == 1:
+            bed = "[rain]"
+        else:
+            filters.append(
+                f"{''.join(bed_parts)}amix=inputs={len(bed_parts)}:normalize=0:"
+                "duration=longest:dropout_transition=0[bed]"
+            )
+            bed = "[bed]"
+        filters.append(
+            f"{bed}[voice_sc]sidechaincompress="
+            "threshold=0.02:ratio=6:attack=300:release=1500[ducked]"
+        )
+        tail = "[voice_mix][ducked]" + ("[pluck]" if pluck_path is not None else "")
+        n = 2 + (1 if pluck_path is not None else 0)
+        filters.append(
+            f"{tail}amix=inputs={n}:normalize=0:duration=longest:dropout_transition=0,"
+            f"apad=whole_dur={runtime:.3f},atrim=0:{runtime:.3f}[mix]"
         )
         audio = "[mix]"
-    else:
-        audio = "[pad]"
 
     video = "[0:v]"
     if ass is not None and ass.is_file():
@@ -588,7 +870,17 @@ def _self_check() -> None:
     )
     assert cues
     assert all(cue.count("\n") <= 1 for cue in cues)
+    assert all(len(line) <= MAX_LINE_CHARS for cue in cues for line in cue.split("\n"))
+    assert all(len(cue.replace("\n", " ").split()) > 2 for cue in cues)
     assert all(_text_width(line) <= MAX_TEXT_W + 0.5 for cue in cues for line in cue.split("\n"))
+    closing = chunk_cues(
+        "Hear them? Through the Dambi Doolloo rain, they are singing your songs "
+        "right back to you. Tonight, my son... I will not cry."
+    )
+    assert closing
+    assert all(len(line) <= MAX_LINE_CHARS and cue.count("\n") <= 1 for cue in closing for line in cue.split("\n"))
+    assert all(len(cue.replace("\n", " ").split()) > 2 for cue in closing)
+    assert not any(cue.strip() in {"one note.", "weep.", "in silence."} for cue in closing)
     held = _hold_short_cues([(0.0, 2.0, "long line"), (2.0, 2.3, "weep.")])
     assert abs((held[1][1] - held[1][0]) - 1.0) < 0.01
     assert abs(held[0][1] - held[1][0]) < 0.01
@@ -640,6 +932,36 @@ def _self_check() -> None:
         during_line = _mean_db(cut, 0.15, 0.25)
         after_line = _mean_db(cut, 1.25, 0.2)
         assert during_line > after_line + 6, (during_line, after_line)
+
+        short = folder / "short.wav"
+        err = _run([
+            "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
+            "-f", "lavfi", "-i", "sine=frequency=440:sample_rate=48000:duration=0.45",
+            str(short),
+        ])
+        assert err is None, err
+        short_s, _formats = probe_audio(short)
+        diegetic_placed = [
+            {
+                "id": "s08", "start_s": 0.0, "duration_s": 4.0, "shot_s": 4.0,
+                "wav_s": short_s, "rate": 1.0, "file": str(short),
+                "en": "Just one old string. Never the song.",
+            },
+            {
+                "id": "s09", "start_s": 4.0, "duration_s": 4.0, "shot_s": 4.0,
+                "wav_s": short_s, "rate": 1.0, "file": str(short),
+                "en": "Listen, my son. They are singing.",
+            },
+        ]
+        diegetic = folder / "diegetic.mp4"
+        err = render(diegetic_placed, 24, diegetic, 8.0, folder / "diegetic.srt")
+        assert err is None, err
+        rain = _mean_db(diegetic, 0.7, 0.4)
+        plucked = _mean_db(diegetic, PLUCK_AT_S + 0.2, 0.4)
+        early_hum = _mean_db(diegetic, 4.7, 0.4)
+        bloom = _mean_db(diegetic, 6.8, 0.6)
+        assert plucked > rain + 6, (plucked, rain)
+        assert bloom > early_hum + 1.5, (bloom, early_hum)
     print("self-check ok")
 
 

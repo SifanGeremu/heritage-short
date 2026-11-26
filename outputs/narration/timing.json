@@ -2,53 +2,53 @@
   "shots": [
     {
       "id": "s01",
-      "file": "outputs/narration/s01_3419c1df.wav",
-      "duration_s": 6.03
+      "file": "outputs/narration/s01_5a66b9d0.wav",
+      "duration_s": 6.7
     },
     {
       "id": "s02",
-      "file": "outputs/narration/s02_f35f333c.wav",
-      "duration_s": 6.44
+      "file": "outputs/narration/s02_96185385.wav",
+      "duration_s": 8.57
     },
     {
       "id": "s03",
-      "file": "outputs/narration/s03_beb06888.wav",
-      "duration_s": 6.56
+      "file": "outputs/narration/s03_20263614.wav",
+      "duration_s": 6.97
     },
     {
       "id": "s04",
-      "file": "outputs/narration/s04_9ec2ae86.wav",
-      "duration_s": 6.09
+      "file": "outputs/narration/s04_7045cf95.wav",
+      "duration_s": 8.49
     },
     {
       "id": "s05",
-      "file": "outputs/narration/s05_9be698c3.wav",
-      "duration_s": 7.3
+      "file": "outputs/narration/s05_36d02fde.wav",
+      "duration_s": 8.2
     },
     {
       "id": "s06",
-      "file": "outputs/narration/s06_34ae7212.wav",
-      "duration_s": 8.16
+      "file": "outputs/narration/s06_5c6fb495.wav",
+      "duration_s": 7.92
     },
     {
       "id": "s07",
-      "file": "outputs/narration/s07_ba4499b9.wav",
-      "duration_s": 7.07
+      "file": "outputs/narration/s07_05f471b4.wav",
+      "duration_s": 8.08
     },
     {
       "id": "s08",
-      "file": "outputs/narration/s08_f7e2593a.wav",
-      "duration_s": 5.94
+      "file": "outputs/narration/s08_53ff8529.wav",
+      "duration_s": 5.96
     },
     {
       "id": "s09",
-      "file": "outputs/narration/s09_b85a3057.wav",
-      "duration_s": 6.9
+      "file": "outputs/narration/s09_630eeb68.wav",
+      "duration_s": 6.64
     },
     {
       "id": "s10",
-      "file": "outputs/narration/s10_3ad6d824.wav",
-      "duration_s": 6.9
+      "file": "outputs/narration/s10_c244f71e.wav",
+      "duration_s": 8.36
     }
   ]
 }
