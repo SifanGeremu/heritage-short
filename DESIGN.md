@@ -290,9 +290,9 @@ From this sitting:
 - A mother's blessing was asked again. s10 is already 8.4 seconds of speech inside a 9-second shot. Another clause would speed the last line, which is the cut-off they heard on the long lines (s02, s04, s05, s07 are still sped on the radio cut).
 - *gitaara*, *Qubee*, *cuquliisaan*, and *dhaloonni* are still this voice. That is the open problem in F-001.
 
-## User test 4 (the cut before his name)
+## User test 4 (the 90-second film)
 
-26 November 2026. Chaltu, Beka, and Dawit. No ages were given. They were listening, not watching: Beka says he had his eyes closed, and Dawit talks about people listening without a screen. The lines they quote are the narration from before storyboard v3. The board on disk now opens s01 with *ilma koo*, says Eebbisaa in s02 and again in s08, and does not contain *hin jiru*, *dhaabe*, *dhaloonni haaraan*, *balbala koo duubaan*, or *haadha si yaaddu qofa*. This sitting was not used to edit the storyboard. The words below are theirs.
+26 November 2026. Chaltu, Beka, and Dawit watched `outputs/film_9x16.mp4`. No ages were given. The English on that file says Eebbisaa at eight seconds and again at 1:07. They still said the voice never landed his name. The words below are theirs.
 
 ### 1. Who is speaking
 
@@ -356,6 +356,6 @@ Dawit: Say his name early on, or at least once, so people listening without a sc
 
 Beka: One line about passing the notebook on. She kept his cassettes and lyric book hidden all these years, so who is she opening them for tonight? Even just saying "I'm opening the door now" before "tonight I won't cry" would tie the silent house to the new generation outside.
 
-### What this sitting did not change
+### What this sitting changed
 
-The storyboard was already on v3 when this note was added. s02 already says Eebbisaa, and it already has the tea and the humming. s10 already answers the proverb. Nothing in `storyboard.json` or the pipeline was edited from these three. Still open, in their words: the voice is too young and too even, *dh* and *q* are still flat, they wanted a real string and voices in the rain, a mother's blessing (*nagaan boqodhu*), the night the news reached the house, and one line about who the notebook is being opened for.
+They watched the current film, and the voice still hid the name the picture already prints. s02 and s08 were left as they are. Nothing in the pipeline was edited from these three. Still open, in their words: the voice is too young and too even, *dh* and *q* are still flat, they wanted a real string and voices in the rain, a mother's blessing (*nagaan boqodhu*), the night the news reached the house, and one line about who the notebook is being opened for.
