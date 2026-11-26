@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Addis AI narration for every Afaan Oromo shot, then outputs/narration/timing.json.
+"""Addis AI narration for every shot, then outputs/narration/timing.json.
 
-Voice is the female Oromo voice om-ayyaantuu. Each wav gets 250ms of lead,
-350ms of tail, and a 15ms fade at both ends. Nothing is trimmed. A cached
-file is reused when the text, voice, and pad match.
+The voice is tts.voice_name and the language is project.narration_language.
+Nothing here replaces a voice that does not start with om-. Each wav gets
+250ms of lead, 350ms of tail, and a 15ms fade at both ends. Nothing is
+trimmed. A cached file is reused when the text, voice, language, and pad match.
 """
 
 import hashlib
@@ -22,15 +23,14 @@ from validate import ensure_storyboard
 NARRATION_DIR = ROOT / "outputs" / "narration"
 CACHE_PATH = NARRATION_DIR / "cache.json"
 TIMING_PATH = NARRATION_DIR / "timing.json"
-VOICE = "om-ayyaantuu"
 
 
-def cache_key(text: str, voice: str) -> str:
+def cache_key(text: str, voice: str, language: str) -> str:
     payload = json.dumps(
         {
             "provider": "addis",
             "voice": voice,
-            "language": LANGUAGE,
+            "language": language,
             "format": "wav_44100",
             "text": text,
             "lead_s": PAD_LEAD_S,
@@ -101,7 +101,7 @@ def timing_row(sid: str, path: Path | None) -> dict:
     return {"id": sid, "file": _rel(path), "duration_s": measured}
 
 
-def speak(key: str, sid: str, text: str, dest: Path, voice: str) -> Path | None:
+def speak(key: str, sid: str, text: str, dest: Path, voice: str, language: str) -> Path | None:
     holder: dict[str, Path] = {}
 
     def once():
@@ -112,7 +112,7 @@ def speak(key: str, sid: str, text: str, dest: Path, voice: str) -> Path | None:
             "parameters": {
                 "text": text,
                 "voice": voice,
-                "language": LANGUAGE,
+                "language": language,
                 "shot": sid,
                 "lead_s": PAD_LEAD_S,
                 "tail_s": PAD_TAIL_S,
@@ -121,7 +121,7 @@ def speak(key: str, sid: str, text: str, dest: Path, voice: str) -> Path | None:
             "cost": 0,
         }
         try:
-            audio = synthesize(key, text, voice, LANGUAGE)
+            audio = synthesize(key, text, voice, language)
             dest.parent.mkdir(parents=True, exist_ok=True)
             raw = dest.with_name(dest.stem + ".raw.wav")
             raw.write_bytes(audio)
@@ -151,10 +151,11 @@ def main() -> int:
         print("ADDIS-AI-API-KEY is missing from .env", file=sys.stderr)
         return 1
     tts = board.get("tts") or {}
-    voice = str(tts.get("voice_name") or VOICE)
-    if not voice.startswith("om-"):
-        voice = VOICE
-    lang = board.get("project", {}).get("narration_language", LANGUAGE)
+    voice = str(tts.get("voice_name") or "").strip()
+    if not voice:
+        print("tts.voice_name is missing from the storyboard", file=sys.stderr)
+        return 1
+    lang = str(board.get("project", {}).get("narration_language") or LANGUAGE)
     cache = load_cache()
     rows = []
     for shot in board.get("shots", []):
@@ -164,14 +165,14 @@ def main() -> int:
             print(f"{sid}: silence")
             rows.append(timing_row(sid, None))
             continue
-        digest = cache_key(text, voice)
+        digest = cache_key(text, voice, lang)
         cached = cache.get(digest)
         if isinstance(cached, str) and (ROOT / cached).is_file():
             path = ROOT / cached
             print(f"{sid}: cached {_rel(path)}")
         else:
             dest = unique_path(NARRATION_DIR / f"{sid}_{digest[:8]}.wav")
-            path = speak(key, sid, text, dest, voice)
+            path = speak(key, sid, text, dest, voice, lang)
             if path is None:
                 return 1
             cache[digest] = _rel(path)
@@ -190,8 +191,9 @@ def main() -> int:
 
 
 def _self_check() -> None:
-    assert cache_key("a", "om-ayyaantuu") == cache_key("a", "om-ayyaantuu")
-    assert cache_key("a", "om-ayyaantuu") != cache_key("a", "om-leensaa")
+    assert cache_key("a", "om-ayyaantuu", "om") == cache_key("a", "om-ayyaantuu", "om")
+    assert cache_key("a", "om-ayyaantuu", "om") != cache_key("a", "om-leensaa", "om")
+    assert cache_key("a", "am-meron", "am") != cache_key("a", "am-meron", "om")
     assert timing_row("s03", None) == {"id": "s03", "file": None}
     with tempfile.TemporaryDirectory() as tmp:
         folder = Path(tmp)

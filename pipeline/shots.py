@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Still keyframes to short clips. FFmpeg zoompan, centred, 1080x1920 at 24 fps.
 
-Movement comes from the shot's motion_prompt: push-in, pull-back, or drift.
+The storyboard names the engine. ken_burns is zoompan. wan2.2 and hunyuan1.5
+are read and not called: the same zoompan move is the fallback, and the run
+says so. Movement comes from motion_prompt: push-in, pull-back, or drift.
 A locked camera gets a smaller drift so it is not a frozen frame. Shots with
 no keyframe are skipped. A clip is reused when the keyframe and the move match.
 """
@@ -25,6 +27,19 @@ CACHE_PATH = OUT_DIR / "cache.json"
 FPS = 24
 WIDTH = 1080
 HEIGHT = 1920
+
+
+def resolve_engine(requested: str) -> tuple[str, str | None]:
+    """The engine that actually renders. Video models stay a logged fallback.
+
+    ponytail: wan2.2 and hunyuan1.5 both become ken_burns. Upgrade path is one
+    branch that calls the video model and caches on its own key.
+    """
+    if requested == "ken_burns":
+        return "ken_burns", None
+    if requested in ("wan2.2", "hunyuan1.5"):
+        return "ken_burns", "video model not called"
+    return "ken_burns", "unknown engine"
 
 
 def move_kind(prompt: str) -> str:
@@ -158,8 +173,12 @@ def main() -> int:
         if isinstance(duration, bool) or not isinstance(duration, int) or duration < 1:
             print(f"{sid}: duration_s must be a positive integer", file=sys.stderr)
             return 1
+        requested = str(shot.get("motion_engine") or "ken_burns")
+        used, note = resolve_engine(requested)
         kind = move_kind(str(shot.get("motion_prompt") or ""))
         frames = duration * FPS
+        if note:
+            print(f"{sid}: requested {requested}, using {used} ({note})")
         params = {
             "motion": kind,
             "duration_s": duration,
@@ -182,7 +201,12 @@ def main() -> int:
             "stage": "shots",
             "provider": "ffmpeg",
             "model": "zoompan",
-            "parameters": {**params, "keyframe": _rel(image)},
+            "parameters": {
+                **params,
+                "keyframe": _rel(image),
+                "motion_engine_requested": requested,
+                "motion_engine_used": used,
+            },
             "output_path": _rel(dest),
         }
         started = time.perf_counter()
@@ -205,6 +229,9 @@ def _self_check() -> None:
     assert move_kind("slow gentle camera push-in") == "push-in"
     assert move_kind("slow pull-back deeper into the room") == "pull-back"
     assert move_kind("very slow horizontal drift across the strings") == "drift"
+    assert resolve_engine("ken_burns") == ("ken_burns", None)
+    assert resolve_engine("wan2.2") == ("ken_burns", "video model not called")
+    assert resolve_engine("hunyuan1.5")[0] == "ken_burns"
     assert move_kind("locked static camera, subtle breathing") == "hold"
     assert "iw/2-(iw/zoom/2)" in zoompan("push-in", 48)
     assert cache_key(b"a", {"motion": "hold"}) != cache_key(b"b", {"motion": "hold"})
