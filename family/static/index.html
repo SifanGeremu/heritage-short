@@ -79,10 +79,18 @@
     .rule { width: 56px; height: 2px; margin: 32px 0; background: var(--orange); }
     .lede {
       max-width: 38ch;
-      margin: 0 0 36px;
+      margin: 0 0 16px;
       font-size: 20px;
       line-height: 1.45;
     }
+    .note {
+      max-width: 42ch;
+      margin: 0 0 32px;
+      color: var(--quiet);
+      font-size: 15px;
+      line-height: 1.45;
+    }
+    .note code { font-family: ui-monospace, "Cascadia Code", monospace; font-size: 0.92em; }
     .primary, #next {
       display: inline-flex;
       align-items: center;
@@ -190,6 +198,7 @@
     }
     .steps li { font-size: 20px; font-weight: 500; color: var(--faint); }
     .steps li.now { color: var(--orange); }
+    .steps li.done { color: var(--ink); }
     .ask h3 {
       margin: 0 0 8px;
       font-family: "Cormorant Garamond", Georgia, serif;
@@ -254,6 +263,29 @@
       object-fit: cover;
       background: var(--ink);
     }
+    .meter {
+      height: 4px;
+      max-width: 240px;
+      margin: 28px auto 0;
+      overflow: hidden;
+      background: rgba(20, 18, 16, 0.12);
+    }
+    .meter > div {
+      height: 100%;
+      width: 0;
+      background: var(--orange);
+    }
+    .meter.busy > div {
+      width: 36%;
+      animation: slide 1.2s ease-in-out infinite;
+    }
+    @keyframes slide {
+      from { transform: translateX(-120%); }
+      to { transform: translateX(320%); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .meter.busy > div { animation: none; width: 45%; }
+    }
     #status, #ready {
       margin: 28px 0 0;
       font-family: "Cormorant Garamond", Georgia, serif;
@@ -273,6 +305,8 @@
     }
     @media (max-width: 800px) {
       .bar { padding: 0 20px; }
+      .bar nav { gap: 16px; }
+      .bar nav a { font-size: 14px; }
       .hero {
         grid-template-columns: 1fr;
         gap: 40px;
@@ -295,6 +329,7 @@
       <nav>
         <a href="#how">How it works</a>
         <a href="#start">Write the letter</a>
+        <a href="https://github.com/SifanGeremu/heritage-short">The film</a>
       </nav>
     </header>
 
@@ -303,7 +338,8 @@
         <p class="kicker">A short film, from a letter</p>
         <h1>Tell them.</h1>
         <div class="rule"></div>
-        <p class="lede">Write three short lines about one person. A painted film comes back, in her voice, ready to send.</p>
+        <p class="lede">Write three short lines about one person. A short vertical film comes back, ready to send.</p>
+        <p class="note" id="host-note">This hosted page paints a flat preview. It does not spend a voice key or an image key. On this machine, make family uses her voice.</p>
         <a class="primary" id="begin" href="#start">Write the letter</a>
       </div>
       <div class="frame" aria-hidden="true">
@@ -409,6 +445,9 @@
 
   <section id="wait" hidden>
     <div class="phone"><img id="still" alt="" hidden></div>
+    <div class="meter busy" id="meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Film progress">
+      <div id="meter-bar"></div>
+    </div>
     <p id="status" role="status">Writing her voice</p>
     <p class="stay">Stay on this page. Pictures show up in the frame as they are painted. Then the film plays.</p>
     <div class="actions">
@@ -452,7 +491,10 @@
     function show(index) {
       step = index;
       sections.forEach((section, n) => { section.hidden = n !== index; });
-      stepMarks.forEach((mark, n) => mark.classList.toggle("now", n === index));
+      stepMarks.forEach((mark, n) => {
+        mark.classList.toggle("now", n === index);
+        mark.classList.toggle("done", n < index);
+      });
       where.textContent = whereText[index];
       back.hidden = index === 0;
       next.textContent = index === 2 ? "Make the film" : "Continue";
@@ -475,6 +517,25 @@
       return body;
     }
 
+    const meter = document.getElementById("meter");
+    const meterBar = document.getElementById("meter-bar");
+
+    function setMeter(value, busy) {
+      const next = Math.max(0, Math.min(100, value));
+      meter.classList.toggle("busy", busy);
+      meterBar.style.width = busy ? "" : next + "%";
+      meter.setAttribute("aria-valuenow", String(next));
+    }
+
+    function showFilm(src) {
+      setMeter(100, false);
+      wait.hidden = true;
+      done.hidden = false;
+      player.src = src;
+      save.href = src;
+      player.play().catch(() => {});
+    }
+
     async function poll(id) {
       const response = await fetch("/api/film/" + id);
       if (!response.ok) {
@@ -484,20 +545,19 @@
       }
       const body = await response.json();
       status.textContent = body.error || body.step || "";
-      if (body.frames && body.frames.length) {
+      const frames = body.frames ? body.frames.length : 0;
+      setMeter(frames ? 40 + frames * 15 : 18, !frames);
+      if (frames) {
         still.hidden = false;
-        still.src = body.frames[body.frames.length - 1];
+        still.src = body.frames[frames - 1];
         still.alt = body.step || "A painted still";
       }
       if (body.status === "ready" && body.film) {
-        wait.hidden = true;
-        done.hidden = false;
-        player.src = body.film;
-        save.href = body.film;
-        player.play().catch(() => {});
+        showFilm(body.film);
         return;
       }
       if (body.status === "error") {
+        setMeter(0, false);
         again.hidden = false;
         return;
       }
@@ -523,6 +583,10 @@
         return;
       }
       next.disabled = true;
+      document.getElementById("site").hidden = true;
+      wait.hidden = false;
+      status.textContent = "Writing her voice";
+      setMeter(12, true);
       const response = await fetch("/api/film", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -530,13 +594,15 @@
       });
       const body = await response.json().catch(() => ({}));
       if (!response.ok) {
-        next.disabled = false;
-        say(body.error || "It stopped.");
+        setMeter(0, false);
+        status.textContent = body.error || "It stopped.";
+        again.hidden = false;
         return;
       }
-      document.getElementById("site").hidden = true;
-      wait.hidden = false;
-      status.textContent = "Writing her voice";
+      if (body.film) {
+        showFilm(body.film);
+        return;
+      }
       poll(body.id);
     });
   </script>

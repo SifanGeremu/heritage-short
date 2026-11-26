@@ -10,7 +10,7 @@ make family
 
 Open http://127.0.0.1:8765
 
-On 26 November 2026 a dry preview was also open at https://depot-switching-beginner-guidance.trycloudflare.com while this machine stayed on. That address is a tunnel, not a permanent host. It dies when the laptop sleeps or the process stops.
+The public preview is on Vercel, which is free: https://swift-iron-xkigogw.tmp.now
 
 `FAMILY_DRY=1 make family` paints flat frames and a quiet tone, and calls no API. The public preview is that mode. A real film needs `ADDIS-AI-API-KEY`, `CLOUDFLARE_ACCOUNT_ID`, and `CLOUDFLARE_API_TOKEN` in `.env`. One film is one portrait and three frames. Two films fill the free Cloudflare day. The voice is Addis `om-ayyaantuu`, a few birr. The person is painted. There is no photo upload. The film ends with "Made with AI".
 

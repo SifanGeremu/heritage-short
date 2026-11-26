@@ -2,6 +2,14 @@
 
 A film about an elderly mother in Dambi Doolloo and the song her son left behind. Narration is Afaan Oromo. Subtitles are English. The picture is a painted still, moved with a slow zoom, under an original instrumental score. Three clocks, and they are not the same number: the ten shot durations sum to 79 seconds; the radio cut is 82 seconds because it keeps those lengths and adds the 3-second end card; the picture exports are 90.042 seconds because each line is slowed to 0.88× and the frame holds to the voice, then the same 3-second card.
 
+## The family page
+
+A relative opens one page, answers three things, and gets a short vertical film. Nothing to install.
+
+**https://swift-iron-xkigogw.tmp.now**
+
+Vercel hosts that page for free on the Hobby plan. The hosted copy is a dry preview: flat frames, a quiet tone, no Addis call, no Cloudflare call. A real film, with her voice and the painted frames, is still `make family` on this machine. The keys stay in `.env`. Details are in `FAMILY.md`.
+
 One command rebuilds it from the storyboard:
 
 ```bash

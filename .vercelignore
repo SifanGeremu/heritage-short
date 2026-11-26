@@ -1,0 +1,5 @@
+.venv
+outputs
+.git
+notebooks
+**/__pycache__

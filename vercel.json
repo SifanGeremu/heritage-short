@@ -1,0 +1,8 @@
+{
+  "functions": {
+    "api/film.py": {
+      "maxDuration": 60,
+      "excludeFiles": "{outputs,.venv,.git,notebooks,DOCS}/**"
+    }
+  }
+}

@@ -30,14 +30,17 @@ def _dry() -> bool:
     return os.environ.get("FAMILY_DRY", "").strip().lower() in ("1", "true", "yes")
 
 
+PREVIEW = (
+    "This hosted page paints a flat preview. It does not spend a voice key or an image key. "
+    "On this machine, make family uses her voice."
+)
+REAL = "A real film uses her voice. A few minutes, a few birr. Two films fill the free day."
+
+
 def _page() -> bytes:
     html = STATIC.read_text(encoding="utf-8")
-    if _dry():
-        html = html.replace(
-            "Four pictures, a few minutes, a few birr. Two films fill the free day.",
-            "This public preview paints flat frames and a quiet tone. It does not call the voice or the image service.",
-            1,
-        )
+    if not _dry():
+        html = html.replace(PREVIEW, REAL, 1)
     return html.encode()
 
 

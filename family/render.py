@@ -49,6 +49,7 @@ def filter_path(path: Path) -> str:
 
 def font_file() -> Path:
     for path in (
+        ROOT / "family" / "fonts" / "DejaVuSans-Bold.ttf",
         Path("/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf"),
         Path("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"),
         Path("/usr/share/fonts/truetype/freefont/FreeSansBold.ttf"),
