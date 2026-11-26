@@ -41,7 +41,7 @@ def move_kind(prompt: str) -> str:
 def zoompan(kind: str, frames: int) -> str:
     """Slow move. Zoom stays at or above 1 so the frame never shows past the photo.
 
-    x and y stay on the centre. Drift is a few percent, inside a later 16:9 crop.
+    x and y stay on the centre. Drift is a few percent of the portrait frame.
     """
     n = max(frames - 1, 1)
     cx = "iw/2-(iw/zoom/2)"
