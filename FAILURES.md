@@ -91,7 +91,7 @@ Storyboard v2 lengthens the narration and states a female delivery in `tts.style
 
 | | |
 | --- | --- |
-| Status | Keyframe never generated. Storyboard v3 put the shot back as narration over the s09 frame. See F-009 and F-010. |
+| Status | Keyframe never generated. `shots.py` copies the previous clip, logs `model: hold`, and assemble uses the newest `s10_*.mp4`. See F-009. |
 | Severity | Blocks the last keyframe until the quota resets |
 | Observed | 25 November 2026 |
 | Component | `pipeline/keyframes.py` |
@@ -107,11 +107,7 @@ The keyframe run got through nine shots. s10 timed out while the service was sti
 
 s10's call (seed 110, no reference image) logged `status: error` after 145 seconds with `The read operation timed out`. The resume returned HTTP 429: "you have used up your daily free allocation of 10,000 neurons, please upgrade to Cloudflare's Workers Paid plan if you would like to continue usage." No s10 file was saved. s01–s09 stayed on disk and were reported as cached on the second run.
 
-The storyboard no longer has s10. The closing beat is s09. A narration wav for the deleted shot is still on disk (`s10_3ad6d824.wav`) and is not in the edit.
-
-### Later
-
-That last paragraph was true on 25 November, after E-010. On 26 November the listens put s10 back on the board. It still has no keyframe of its own. Assembly holds the s09 clip. The children-in-the-rain frame was never generated (F-009).
+On 25 November, after E-010, s10 was taken off the board. A narration wav for that cut is still on disk (`s10_3ad6d824.wav`). On 26 November the listens put s10 back. It still has no keyframe of its own. The children-in-the-rain frame was never generated (F-009). `make shots` on 26 November at 16:21 UTC copied `s09_40a1aeca.mp4` to `outputs/shots/s10_886cac85.mp4` and logged `provider: ffmpeg`, `model: hold`, latency 0.011 s. `outputs/shots/s10_hold9.mp4` is the hand copy from before that function. Assemble uses the newest `s10_*.mp4`.
 
 ## F-004. ACE-Step would not import on Kaggle
 
@@ -147,13 +143,7 @@ The workaround is the voice in the film: Addis `om-ayyaantuu`. Gemini stayed in 
 | Observed | Across `runs.jsonl`. No `wan` provider line. |
 | Component | `pipeline/shots.py` |
 
-The brief's video stage is Wan 2.2 image-to-video on Kaggle. This repo did not spend that GPU. After the keyframes existed, `shots.py` turned each jpg into a 24 fps clip with FFmpeg `zoompan`. Four shots in the storyboard still say `motion_engine: wan2.2`. The script does not read that field. It classifies `motion_prompt` into push-in, pull-back, drift, or hold.
-
-This is the fallback the brief allows when video generation is not available. It is not a measured Wan failure. Wan was not given a chance to fail. The trade is recorded in EXPERIMENTS E-008: nine clips in 24 seconds of CPU, and no identity drift inside a clip, because the picture never leaves the keyframe.
-
-### Later
-
-`shots.py` now reads `motion_engine`. A shot that still says `wan2.2` prints `requested wan2.2, using ken_burns (video model not called)` and renders the zoom that was already cached. The field is no longer ignored. Wan is still untested.
+The brief's video stage is Wan 2.2 image-to-video on Kaggle. This repo did not spend that GPU. After the keyframes existed, `shots.py` turned each jpg into a 24 fps clip with FFmpeg `zoompan`. The storyboard now says `ken_burns` on every shot. `shots.py` still reads `motion_engine`. A shot that says `wan2.2` or `hunyuan1.5` prints that the video model was not called and renders the same zoom. Wan is still untested. There is no Wan line in `runs.jsonl`. The trade is E-008: nine clips in 24 seconds of CPU, and no identity drift inside a clip, because the picture never leaves the keyframe.
 
 ## F-007. Film subtitles dropped s10
 
@@ -225,16 +215,16 @@ The jpeg is `outputs/smoke/s01_pollinations_mother_child.jpg`. It is not in `out
 | --- | --- |
 | Status | Fixed by reassembling the picture films on storyboard v3 |
 | Severity | Viewers thought the video had not loaded, and they never heard his name |
-| Observed | 26 November 2026, Girma and two other viewers |
+| Observed | 26 November 2026, Girma, Geremew, and Amen |
 | Component | `outputs/film_9x16.mp4`, `outputs/radio_cut.mp4` |
 
 ### Summary
 
-Girma and an older Oromo viewer saw a black frame and thought the phone was stuck. Girma: the screen stayed completely black, and when she said "Look" and "Listen" there was nothing to see or hear. The older viewer heard her stop halfway through a word. A younger viewer, reading the English, heard only rain when she plucked a string and said listen: no guitar, and no one singing. They also quoted "weep", a swallowed *hin jiru*, twisted *gitaara*, *Qubee*, *qalama cuquliisaan*, and *dhaloonni*, and said the film never spoke his name. Those lines are the 72-second picture export from before storyboard v3. The radio cut is black, and it already had the v3 lines. The guitar note started 1.5 seconds into s08, under the words, so they heard rain when she said listen. The full answers are in `DESIGN.md`, User test 3.
+Girma and Geremew saw a black frame and thought the phone was stuck. Girma: the screen stayed completely black, and when she said "Look" and "Listen" there was nothing to see or hear. Geremew heard her stop halfway through a word. Amen, reading the English, heard only rain when she plucked a string and said listen: no guitar, and no one singing. They also quoted "weep", a swallowed *hin jiru*, twisted *gitaara*, *Qubee*, *qalama cuquliisaan*, and *dhaloonni*, and said the film never spoke his name. Those lines are the 72-second picture export from before storyboard v3. The radio cut is black, and it already had the v3 lines. The guitar note started 1.5 seconds into s08, under the words, so they heard rain when she said listen. The full answers are in `DESIGN.md`, under the old-cut watch.
 
 ### Fix
 
-`film_9x16.mp4` and `film_16x9.mp4` are cut again from the v3 narration and the existing frames. s10 reuses the s09 clip (`outputs/shots/s10_hold9.mp4`) because that keyframe was never generated. The pluck moves to 3.3 seconds, the gap in `s08_53ff8529.wav` after "Just one old string...", at gain 2.0, in both the radio cut and the picture mix.
+`film_9x16.mp4` and `film_16x9.mp4` are cut again from the v3 narration and the existing frames. s10 reuses the s09 picture because that keyframe was never generated. The logged hold is `outputs/shots/s10_886cac85.mp4`. `s10_hold9.mp4` is the earlier hand copy. The pluck moves to 3.3 seconds, the gap in `s08_53ff8529.wav` after "Just one old string...", at gain 2.0, in both the radio cut and the picture mix.
 
 ## F-011. A fresh Addis take of the teaching sentence says baleessuu
 

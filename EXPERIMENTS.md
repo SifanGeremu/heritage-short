@@ -1,6 +1,6 @@
 # Experiments
 
-Each entry is one change, checked against `runs.jsonl` or a file on disk. Ten are recorded. The listening choice between music seeds is the one result that is not in the log: the storyboard locks seed 303, and the log only has latency. The reason is in E-009.
+Each entry is one change, checked against `runs.jsonl`, a file on disk, or a temp-directory self-check. Twelve are recorded.
 
 ## E-001. Validation stops when a shot has no reason
 
@@ -48,7 +48,7 @@ Hypothesis: Four FLUX.2 klein 9B portraits at seeds 201–204 will produce one f
 
 Change: `pipeline/reference_sheet.py`, 25 November 13:48–13:49 UTC. Same character prompt, seeds 201, 202, 203, 204. Latencies 13.1 s, 13.7 s, 15.0 s, 15.1 s. Cost 0.
 
-Result: Seed 201 was kept as `outputs/reference/golden.jpg` and scaled to `golden_480.jpg`. The reason for that seed: she looks straight at us, calm, cream scarf, worn brown dress, and both hands in frame, so later shots have a face to follow. Character shots pass that image as the klein reference. Shots with `has_character: false` (s01) do not.
+Result: Seed 201 was kept as `outputs/reference/golden.jpg` and scaled to `golden_480.jpg`. She looks straight at us, calm, cream scarf, worn brown dress, and both hands in frame, so later shots have a face to follow. `character.reference_seed` is 201. `keyframes.py` reads that field before an image call, and `make reference` writes `golden_480.jpg` from it. Seeds 202, 203, and 204 are in `runs.jsonl` at 13.7 s, 15.0 s, and 15.1 s. The sheet the film uses is 201.
 
 ## E-007. Nine keyframes, then the neuron cap
 
@@ -64,7 +64,7 @@ Hypothesis: A slow FFmpeg zoom on the keyframe is enough motion for a narrated f
 
 Change: `pipeline/shots.py` maps `motion_prompt` to push-in, pull-back, drift, or hold, and renders 24 fps zoompan. Nine clips, 25 November. Combined FFmpeg latency 24.1 s. Cache key is the keyframe bytes plus the move.
 
-Result: All nine status `ok`. No Wan line exists in `runs.jsonl`. The storyboard still says `motion_engine: wan2.2` on s01, s02, s06, and s07. On 26 November `shots.py` was changed so it reads that field, prints that the video model was not called, and keeps the cached zoom. Re-running `make shots` with the same jpgs and prompts still hits the cache. Wan itself was still not run.
+Result: All nine status `ok`. Nine clips in 24.1 seconds of CPU. The picture never leaves the keyframe, so the person does not change inside a clip. The board says `ken_burns` on every shot, and that is the move `shots.py` renders. s10, which has no keyframe, is the hold in E-012. F-006 records that Wan was not called.
 
 ## E-009. Three ACE-Step seeds, one selected
 
@@ -72,7 +72,7 @@ Hypothesis: Three instrumental seeds at 68 BPM in A minor will give a bed that c
 
 Change: ACE-Step 1.5 on Kaggle, `MPLBACKEND=Agg` after the notebook crashed on Kaggle's inline matplotlib backend. Seeds 301, 302, 303. Captions are the two cues in the storyboard (sparse guitar, then a warmer resolve). `instrumental: true`.
 
-Result: From `outputs/music/latencies.json` and `candidates.json`: 1.701 GPU minutes. Seed 301, 18.373 s, 84 s of audio. Seed 302, 13.288 s, 84 s. Seed 303, 13.302 s, 84 s. All three logged status `ok`, cost 0. `music.selected_seed` is 303, and `assemble.py` refuses to run if that wav is missing. The log has the latency and not the vote. I kept 303 because it was the best listen of the three: the music stays alive, and so does the story. 301 and 302 stay on disk as the rejected takes.
+Result: From `outputs/music/latencies.json`: 1.701 GPU minutes. Seed 301, 18.373 s. Seed 302, 13.288 s. Seed 303, 13.302 s. Each file is 84 s of audio, status `ok`, cost 0. `music.selected_seed` is 303, the bed under the voice, and `assemble.py` refuses to run if that wav is missing. 301 and 302 stay on disk beside it.
 
 ## E-010. Drop s10 rather than wait a day for one keyframe
 
@@ -80,7 +80,7 @@ Hypothesis: A nine-shot cut still lands inside 60–90 seconds and still carries
 
 Change: s10 had narration (`s10_3ad6d824.wav`, 6.9 s, 0.525 ETB) and no picture. The shot was removed from `storyboard.json`. The closing beat stayed on s09 (the close-up at the door).
 
-Result: At that point the shot durations summed to 70 seconds and `make validate` accepted the board. The export was 72.5 seconds with the 3-second "Made with AI" card. The 26 November listens put s10 back (DESIGN.md). The board on disk is ten shots, 79 seconds, and both picture exports are 90.0 seconds. A full Amharic narration was still not synthesized. E-011 speaks one Amharic sentence from this board.
+Result: At that point the shot durations summed to 70 seconds and `make validate` accepted the board. The export was 72.5 seconds with the 3-second "Made with AI" card. The 26 November listens put s10 back (DESIGN.md). The board on disk is ten shots, 79 seconds, and both picture exports are 90.042 seconds. A full Amharic narration was still not synthesized. E-011 speaks one Amharic sentence from this board.
 
 ## E-011. The same four fragments on Gemini TTS and on Addis
 
@@ -98,3 +98,11 @@ Result: All eight TTS calls are `ok` in `runs.jsonl`. Gemini cost 0. Latencies 5
 | am-guitar | ኤቢሳ፣ ጊታርህ አሁንም ግድግዳው ላይ ተደግፎ አለ። | ቢሳ ጊታር አሁንም ግድግዳው ላይ ተደግፎ አለ | 2 | ኤቢሳ ጊታር አሁንም ግድግዳው ላይ ተደግፎ አለ | 1 |
 
 Gemini 13 errors of 34 tokens. Addis 5 of 34. `gitaarri`, `qubee`, and `cuquliisni` came back from Addis. Gemini wrote `gitaarrii` and `kalam`, and it kept `qubee` and `cuquliisni`. On the teaching line Addis wrote `baleessuu` where the source says `barreessuu`. In Amharic, Addis kept `ኤቢሳ` and both voices dropped the `ህ` on `ጊታርህ`. Gemini wrote `ቢሳ`. The film stays on `om-ayyaantuu`. There is still no full Amharic cut. The wavs are `outputs/benchmark/`. The numbers are also in `outputs/benchmark/summary.json`.
+
+## E-012. A missing picture copies the previous clip, and a missing score is a sine
+
+Hypothesis: `shots.py` can make an s10 clip from the previous clip without a keyframe, and `music.py` can log a bed when the Kaggle wavs are absent, both without calling a provider.
+
+Change: `python pipeline/shots.py --self-check` copies bytes in a temp directory. `python pipeline/music.py --self-check` writes three 0.2-second sines in a temp directory and a `latencies.json` with `source: ffmpeg`. Neither command reads `outputs/`.
+
+Result: The hold digest changes when the source bytes change, and the copy matches the source. The same function, run on the real shots, logged `outputs/shots/s10_886cac85.mp4` on 26 November at 16:21 UTC: `provider: ffmpeg`, `model: hold`, latency 0.011 s, copied from `s09_40a1aeca.mp4`. s01–s09 printed `cached`. The sine fallback record is `provider: ffmpeg`, `model: sine`, `gpu_minutes` 0. A second call leaves the wav bytes in place. The ACE-Step files already on this disk are untouched, because all three wavs and `latencies.json` are present, and that is the path `make music` takes.

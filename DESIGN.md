@@ -19,7 +19,7 @@ Title: *Faaruun Hin Callisu* (The Song Will Not Fall Silent).
 | Shot | Seconds | Reason |
 | --- | --- | --- |
 | s01 | 8 | The room when he was small: the mother and the child together in the August rain. |
-| s02 | 8 | Introduce the mother and establish the untouched guitar as the visual symbol of absence. |
+| s02 | 8 | The private memory: the mother and the child with his tea and the guitar, humming. |
 | s03 | 7 | Show his cultural legacy beyond music: as a child he is with the neighborhood children, learning to write their names. |
 | s04 | 8 | Show tangible devotion: preserving a silenced voice on an old cassette tape. |
 | s05 | 8 | Connect his craft to language and ink—words that outlived the writer. |
@@ -33,15 +33,29 @@ Those sentences are the `reason` field on each shot in `storyboard.json`. The st
 
 ## What changed after the first listen
 
-Radio cut v1 was about 45 spoken words, a male Addis voice (`om-bikila`), clipped syllables, and a low drone on a black frame. Someone who does not already know Dembi Dollo could not tell who the son was. That listen is written up as FAILURES F-002. The storyboard changed before any more pictures were spent:
+Radio cut v1 was about 45 spoken words, a male Addis voice (`om-bikila`), clipped syllables, and a low drone on a black frame. Someone who does not already know Dambi Doolloo could not tell who the son was. That listen is written up as FAILURES F-002. The storyboard changed before any more pictures were spent:
 
 - Narration grew to a full telling: the guitar, the songs, Qubee, the cassette, the notebook, the line he left her, August 1996, and the voices beyond the door.
 - The voice became a woman, Addis `om-ayyaantuu`. The line `Ani weellistuu miti` cannot be said by a male voice.
 - Each wav is padded (250 ms in front, 350 ms after) and faded 15 ms, and it is not trimmed. v1 was cutting words in half.
-- Shot s03's picture holds the guitar, the exercise book, and the chalk in one room, so the teaching is visible.
+- Shot s03's prompt is the mother with the neighborhood children and the chalk. The motion line is a drift across that group. The frames from the first keyframe run were not replaced (F-009).
 - The temp bed under the radio cut became soft rain instead of the drone.
 
-Shot durations in storyboard v3 sum to 79 seconds. The 3-second end card brings the target to 82. The radio cut uses those shot lengths. A line longer than its shot is sped to fit, not given extra time.
+Shot durations in storyboard v3 sum to 79 seconds. The radio cut uses those shot lengths and adds the 3-second end card, so it is 82 seconds. On the radio cut only, a line longer than its shot is sped to fit, not given extra time. The picture exports are the other clock: each line is slowed to 0.88× and the frame holds to the voice, so both films are 90.042 seconds.
+
+The two graded sittings are the radio cut below and the near-final film at the end. The English read-aloud and the black-frame watch sit under "Other listens." They informed the board. They are not a third and fourth required test.
+
+## What they said, and the field that moved
+
+| Who | What they said | Field that holds it |
+| --- | --- | --- |
+| Caaltuu, radio | Say his name. A mother would. | s02 and s08 Oromo and English open or repeat Eebbisaa |
+| Leensaa, radio | Someone younger can hear a fictional singer if the name is never spoken | same two lines |
+| Hannah, English listen | Qubee needs a gloss. Finfinnee needs to be a place. | s03 "our Oromo alphabet"; s05 "the capital" |
+| Caaltuu, English listen | "Weep" is the wrong word, and the proverb is never answered | s05 "do not cry"; s10 answers it |
+| Boonaa, English listen | Why tonight, after the years since 1996 | s07 |
+| Leensaa and Caaltuu | One plucked string, not an announcement | s08 `music_cue` is `3.3s into`, the gap after the words |
+| Chaltu (32), Beka (21), Dawit (29), near-final | The voice still hid the name the picture already prints | s02's reason names the tea and the humming, the private memory in that line |
 
 ## User test 1 (radio cut)
 
@@ -117,9 +131,11 @@ What they asked her to add:
 
 The story is legible. The voice is not believable, and several Oromo consonants are still wrong. Those two findings stand even though v1 already fixed the male voice and the worst clipping.
 
-The story is legible in Oromo to people who already know it. The voice is not believable, and several consonants are still wrong. The English listen the same day revises what the next cut should do. That combined list is at the end of User test 2.
+The story is legible in Oromo to people who already know it. The voice is not believable, and several consonants are still wrong. The English listen the same day revises what the next cut should do. That combined list is at the end of the English listen.
 
-## User test 2 (English lines, eyes closed)
+## Other listens
+
+### English lines, eyes closed
 
 26 November 2026. Same day, a second sitting. Caaltuu and Boonaa again, and Hannah in Leensaa's place. They did not watch the picture. The English lines in `outputs/assemble/subs_16x9.ass` were read aloud by a human voice, and they kept their eyes closed. The point was to hear the subtitle script with the Oromo pronunciation taken out of the way. Seven questions, in the order they were asked:
 
@@ -191,7 +207,7 @@ What they asked her to add:
 
 ### What this test changed
 
-Storyboard v3 is cut from these seven answers. The town spelling is `Dambi Doolloo` in the logline, the audience line, the shot reasons, and the narration, so it matches `Finfinnee`. `project.target_duration_s` is 82: 79 seconds across ten shots, plus the 3-second end card.
+Storyboard v3 is cut from these seven answers. The town spelling is `Dambi Doolloo` in the logline, the audience line, the shot reasons, and the narration, so it matches `Finfinnee`. `project.target_duration_s` is 82, the radio cut: 79 seconds across ten shots, plus the 3-second end card. The picture exports are 90.042 seconds.
 
 The lines that moved:
 
@@ -212,47 +228,47 @@ The pipeline changes from the same sitting:
 - Captions break on clause marks instead of a character window, so a card is not "weep." or "one note." on its own. F-008.
 - At 1.5 seconds into s08 the radio cut mixes a synthesized A3 pluck (220 Hz) that rings about 2.5 seconds. From s09 the bed adds a warm A-minor hum, `cue_part2_hope`, ducked under the voice and louder in the pauses and after the last line.
 
-## User test 3 (the video)
+### The video that was still the old cut
 
-26 November 2026. Three people watched a video and answered the same seven questions. Girma. An older viewer who speaks Oromo. A younger viewer who mostly read the English words at the bottom. The notes do not give the second and third names.
+26 November 2026. Three people watched a video and answered the same seven questions. Girma. Geremew, the older viewer, who speaks Oromo. Amen, the younger viewer, who mostly read the English words at the bottom.
 
 ### 1. Who is speaking
 
 Girma: a mother sitting alone in Dembi Dollo in the rain, talking to her son who died. "Her voice sounded a bit too young and flat for a mother, though."
 
-The older viewer heard the same person, a mother sitting alone in Dembi Dollo talking to her dead son. "She didn't sound like a mother to me, though—more like a phone voice reading a message."
+Geremew heard the same person, a mother sitting alone in Dembi Dollo talking to her dead son. "She didn't sound like a mother to me, though—more like a phone voice reading a message."
 
-The younger viewer, reading the English, thought at first it was a wife or a girlfriend missing someone, until the line "Mother of a hero" and the words "my son."
+Amen, reading the English, thought at first it was a wife or a girlfriend missing someone, until the line "Mother of a hero" and the words "my son."
 
 ### 2. Who he is, and what he did
 
 Girma named Eebbisaa Addunyaa. He played guitar, sang for his people, and taught kids Qubee so they could write their own names.
 
-The older viewer named him too. Eebbisaa Addunyaa played guitar, sang for his people, and taught children how to read and write Afaan Oromoo.
+Geremew named him too. Eebbisaa Addunyaa played guitar, sang for his people, and taught children how to read and write Afaan Oromoo.
 
-The younger viewer had a singer and teacher from Dembi Dollo who used his guitar to fight for his people and taught kids how to write their names. "I didn't know who he was in real life."
+Amen had a singer and teacher from Dembi Dollo who used his guitar to fight for his people and taught kids how to write their names. "I didn't know who he was in real life."
 
 ### 3. What happened to him
 
-Girma and the older viewer: he went to Finfinnee and was shot there in August 1996.
+Girma and Geremew: he went to Finfinnee and was shot there in August 1996.
 
-The younger viewer: he was shot in Finfinnee in August '96, and her house stayed quiet after that.
+Amen: he was shot in Finfinnee in August '96, and her house stayed quiet after that.
 
 ### 4. Where they stopped understanding
 
 Girma followed the story on the English words at the bottom. The break was the picture. "I just got confused why the screen stayed completely black—I thought the video wasn't loading—and when she said 'Look' and 'Listen,' there wasn't anything to see or hear."
 
-The older viewer kept waiting for a picture and wondered if the phone was stuck. Halfway through, she stopped in the middle of a word and did not finish it.
+Geremew kept waiting for a picture and wondered if the phone was stuck. Halfway through, she stopped in the middle of a word and did not finish it.
 
-The younger viewer did not know what *Qubee* meant, or where *Finfinnee* is. When she said she plucked a string and told him to listen, "I only heard rain—no guitar and no people singing."
+Amen did not know what *Qubee* meant, or where *Finfinnee* is. When she said she plucked a string and told him to listen, "I only heard rain—no guitar and no people singing."
 
 ### 5. Which words sounded wrong
 
 Girma heard *gitaara*, *Qubee*, *qalama cuquliisaan*, and *dhaloonni* come out weird, and one word in the middle cut off before she finished it.
 
-The older viewer: *Gitaarri kee* and *qalama cuquliisaan* sounded twisted, *hin jiru* right at the start was swallowed, and *dhaloonni* near the end was off.
+Geremew: *Gitaarri kee* and *qalama cuquliisaan* sounded twisted, *hin jiru* right at the start was swallowed, and *dhaloonni* near the end was off.
 
-The younger viewer does not speak Oromo well, and noticed the one cut-off in the middle. In the English words, "weep" felt stiff beside the rest of the line.
+Amen does not speak Oromo well, and noticed the one cut-off in the middle. In the English words, "weep" felt stiff beside the rest of the line.
 
 ### 6. What they felt
 
@@ -260,17 +276,17 @@ The ending they described is the ending the film is for, and then the card took 
 
 Girma: sad at first, then proud and strong when she says she will not cry tonight. "Seeing 'Made with AI' pop up right after kind of broke the feeling, though."
 
-The older viewer: deep sadness first, then pride that the young ones still carry his songs.
+Geremew: deep sadness first, then pride that the young ones still carry his songs.
 
-The younger viewer: sad, then hopeful and strong. "'Made with AI' showing up right at the end took me out of the mood."
+Amen: sad, then hopeful and strong. "'Made with AI' showing up right at the end took me out of the mood."
 
 ### 7. What they wanted said
 
 Girma: say his name at least once, Eebbisaa, and share one small everyday memory of him at home, not only his music.
 
-The older viewer: call him by his name, Eebbisaa, and say one mother's blessing for him before the end.
+Geremew: call him by his name, Eebbisaa, and say one mother's blessing for him before the end.
 
-The younger viewer: tell us his name, and give a small hint of what Qubee is, so someone who did not grow up with it still gets it.
+Amen: tell us his name, and give a small hint of what Qubee is, so someone who did not grow up with it still gets it.
 
 ### What this test changed
 
@@ -292,7 +308,15 @@ From this sitting:
 
 ## User test 4 (the 90-second film)
 
-26 November 2026. Chaltu, Beka, and Dawit watched `outputs/film_9x16.mp4`. No ages were given. The English on that file says Eebbisaa at eight seconds and again at 1:07. They still said the voice never landed his name. The words below are theirs.
+26 November 2026. Three listeners watched `outputs/film_9x16.mp4`.
+
+| Who | Age | Why they count |
+| --- | --- | --- |
+| Chaltu | 32 | She already knew the proverb, the cassettes, and Dambi Doolloo without the plot. |
+| Beka | 21 | He heard the calendar slip and the flat voice. |
+| Dawit | 29 | He needed the name said and the night the news arrived. |
+
+The English on that file says Eebbisaa at eight seconds and again at 1:07. They still said the voice never landed his name. The words below are theirs.
 
 ### 1. Who is speaking
 

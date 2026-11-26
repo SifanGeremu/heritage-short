@@ -18,10 +18,47 @@ Measured on 25–26 November 2026.
 | Reference | klein 9B, seeds 201–204 | 57 s | 0 | Cloudflare free allowance |
 | Keyframes | klein 9B, s01–s09 | 185 s | 0 | Same allowance. s10 never got an image. |
 | Shots | FFmpeg zoompan, 9 clips | 24 s | 0 | Local CPU. No GPU. |
-| Music | ACE-Step 1.5, seeds 301–303, Kaggle | 1.701 GPU minutes; 45 s of generation latency | 0 | Open weights. Kaggle's free GPU. |
-| Assemble | Final pass, 26 November 08:02–08:06 UTC | 316 s of FFmpeg (picture, mix, two-pass loudnorm, both exports) | 0 | Local CPU |
+| Music | ACE-Step 1.5, seeds 301–303, Kaggle T4 | 1.701 GPU minutes; 44.963 s logged latency | 0 | $0.0149. Arithmetic below. |
+| Assemble | One pass, 26 November 08:02–08:06 UTC | 316.435 s of FFmpeg | 0 | Local CPU. This is one of three passes. The log total is below. |
 | Language probe | Gemini TTS, 4 short lines, all ok | 29.4 s | 0 | Free tier. Not in the film. E-011. |
 | Language probe | Addis, 3× `om-ayyaantuu` and 1× `am-meron` | 37.4 s | 1.2884 ETB | 15.46 s of audio at 5 ETB per minute. Not in the film. |
+
+## What the log adds up to
+
+`runs.jsonl` has 175 lines. Summing `latency` and `cost` by stage:
+
+| Stage | Lines | Latency (s) | Logged cost |
+| --- | ---: | ---: | ---: |
+| list | 7 | 8.396 | 0 |
+| text | 18 | 280.557 | 0 |
+| tts | 9 | 39.505 | 0.8483 ETB |
+| narration | 56 | 474.657 | 12.7957 ETB |
+| image | 1 | 12.943 | 0 |
+| reference | 4 | 56.898 | 0 |
+| keyframes | 22 | 385.695 | 0 |
+| shots | 12 | 29.980 | 0 |
+| music | 3 | 44.963 | 0 |
+| assemble | 18 | 1011.373 | 0 |
+| benchmark-tts | 8 | 66.833 | 1.2884 ETB |
+| benchmark-scribe | 17 | 0 | 0 |
+
+The narration 12.7957 ETB is the 10.94 ETB of `om-ayyaantuu` (5.12 + 5.82) plus 1.8557 ETB of `om-bikila`. The table above the fold splits those takes. It does not replace this sum.
+
+The shots row is the nine zoompan clips plus the s10 hold logged on 26 November at 16:21 UTC: `outputs/shots/s10_886cac85.mp4`, `model: hold`, latency 0.011 s. The 24 s in the first table is the zoompan pass.
+
+Assemble is three passes, not one. 25 November 21:00 UTC is 296.425 s. 26 November 08:00 UTC is 316.435 s. 26 November 11:00 UTC is 398.513 s. The row in the first table is the middle pass.
+
+Seventeen `benchmark-scribe` lines have no timestamp and no latency. The logger omitted both. Those rows were not rewritten, and Scribe was not called again. `log_scribe` now writes `latency`. A later run will have it. This one does not.
+
+## List price, including the free invoice
+
+Logged cost stays 0 where the invoice was 0. The list price is what the same quantity costs in public.
+
+Cloudflare Workers AI is $0.011 per 1,000 neurons, and the free allocation is 10,000 neurons a day ([Workers AI pricing](https://developers.cloudflare.com/workers-ai/platform/pricing/)). The account used that allocation. The log does not give a neuron count per image, so the equivalent priced here is the allowance that ran out: 10,000 / 1,000 × 0.011 = **$0.11**.
+
+The score ran on a Kaggle T4 (`notebooks/music_ace_step.py`). Kaggle did not bill it. A published on-demand price for one T4 is the AWS `g4dn.xlarge` in US East (N. Virginia), $0.526 per hour ([g4dn.xlarge](https://compute.info/vm/aws/g4dn-xlarge/), prices as of 26 November 2026). 1.701 / 60 × 0.526 = **$0.0149**.
+
+An Amharic reading of the ten lines already on the board was not synthesized. `python pipeline/benchmark_lang.py --quote` prices it from the Oromo seconds in `timing.json` (75.89 s) and the character counts, at the same 5 ETB per minute. The quote is 40.88 seconds and **3.4065 ETB**. No Amharic audio was made for that number.
 
 ## The cap that actually hit
 
