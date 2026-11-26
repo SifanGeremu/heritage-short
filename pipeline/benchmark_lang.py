@@ -11,6 +11,7 @@ the same company judging both speakers. make film does not call this.
 import json
 import re
 import sys
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -126,7 +127,39 @@ def scribe(key: str, path: Path, language: str) -> dict:
     return client.scribe.transcribe(audio=path.read_bytes(), language=language, backend="turbo")
 
 
-def log_scribe(probe: dict, provider: str, path: Path, heard: str, started_cost: float) -> None:
+def amharic_quote(board: dict, timing: list[dict], rate_etb_per_min: float = 5.0) -> dict:
+    """Price an unrendered Amharic cut from the Oromo seconds already measured.
+
+    Seconds per character come from the Oromo lines and timing.json. The Amharic
+    text is never sent to a provider.
+    """
+    by_id = {row["id"]: float(row["duration_s"]) for row in timing}
+    om_chars = 0
+    om_seconds = 0.0
+    am_chars = 0
+    for shot in board.get("shots") or []:
+        narration = shot.get("narration") or {}
+        om = str(narration.get("om") or "").strip()
+        am = str(narration.get("am") or "").strip()
+        seconds = by_id.get(shot.get("id"))
+        if not om or seconds is None:
+            continue
+        om_chars += len(om)
+        om_seconds += seconds
+        am_chars += len(am)
+    if om_chars == 0:
+        raise ValueError("no Oromo seconds to price from")
+    am_seconds = am_chars * (om_seconds / om_chars)
+    return {
+        "om_chars": om_chars,
+        "om_seconds": round(om_seconds, 2),
+        "am_chars": am_chars,
+        "am_seconds": round(am_seconds, 2),
+        "cost_etb": round(rate_etb_per_min * am_seconds / 60, 4),
+    }
+
+
+def log_scribe(probe: dict, provider: str, path: Path, heard: str, started_cost: float, latency: float) -> None:
     errors = word_errors(probe["text"], heard) if heard else None
     count = len(tokens(probe["text"]))
     record = {
@@ -145,6 +178,7 @@ def log_scribe(probe: dict, provider: str, path: Path, heard: str, started_cost:
             "source_tokens": count,
         },
         "seed": None,
+        "latency": latency,
         "cost": started_cost,
         "status": "ok" if heard else "error",
         "output_path": _rel(path),
@@ -156,6 +190,16 @@ def log_scribe(probe: dict, provider: str, path: Path, heard: str, started_cost:
 
 
 def main() -> int:
+    if "--quote" in sys.argv:
+        board = ensure_storyboard()
+        timing = json.loads((ROOT / "outputs" / "narration" / "timing.json").read_text(encoding="utf-8"))
+        quote = amharic_quote(board, timing.get("shots") or [])
+        print(
+            f"amharic quote {quote['am_seconds']:.2f}s "
+            f"{quote['cost_etb']:.4f} ETB "
+            f"from {quote['om_seconds']:.2f}s of Oromo"
+        )
+        return 0
     board = ensure_storyboard()
     check_slices(board)
     gemini_key = read_key("GEMINI_API_KEY")
@@ -238,9 +282,11 @@ def main() -> int:
             heard = ""
             errors = None
             if spoken and dest.is_file():
+                started = time.perf_counter()
                 try:
                     heard = transcript_of(scribe(addis_key, dest, probe["language"]))
                 except Exception as err:
+                    latency = round(time.perf_counter() - started, 3)
                     log_run(
                         {
                             "timestamp": datetime.now(timezone.utc).isoformat(),
@@ -254,7 +300,7 @@ def main() -> int:
                                 "language": probe["language"],
                             },
                             "seed": None,
-                            "latency": None,
+                            "latency": latency,
                             "cost": 0,
                             "status": "error",
                             "output_path": _rel(dest),
@@ -263,7 +309,8 @@ def main() -> int:
                     )
                     print(f"{probe['id']} {provider} scribe failed: {err}", file=sys.stderr)
                 else:
-                    log_scribe(probe, provider, dest, heard, 0)
+                    latency = round(time.perf_counter() - started, 3)
+                    log_scribe(probe, provider, dest, heard, 0, latency)
                     if heard:
                         errors = word_errors(probe["text"], heard)
                         print(f"{probe['id']} {provider} errors {errors} :: {heard}")
@@ -291,6 +338,13 @@ def _self_check() -> None:
     assert word_errors("gitaarri kee", "gitaari kee") == 1
     assert word_errors("a b", "") == 2
     assert tokens("Qubee—afaan") == ["qubee", "afaan"]
+    quote = amharic_quote(
+        {"shots": [{"id": "s01", "narration": {"om": "abcd", "am": "ab"}}]},
+        [{"id": "s01", "duration_s": 4.0}],
+    )
+    assert quote["om_seconds"] == 4.0
+    assert quote["am_seconds"] == 2.0
+    assert quote["cost_etb"] == round(5 * 2 / 60, 4)
     print("self-check ok")
 
 
