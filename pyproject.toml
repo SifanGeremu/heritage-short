@@ -6,3 +6,6 @@ dependencies = [
   "jsonschema",
   "imageio-ffmpeg",
 ]
+
+[tool.vercel]
+entrypoint = "api.film:handler"

@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "film.py": {
+      "maxDuration": 60
+    }
+  }
+}
