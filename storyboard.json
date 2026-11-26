@@ -3,15 +3,15 @@
   "project": {
     "title": "Faaruun Hin Callisu",
     "english_title": "The Song Will Not Fall Silent",
-    "logline": "An elderly mother in Dembi Dollo plucks one string on her late son's dusty guitar and hears a new generation singing his melody back through the August rain.",
-    "target_duration_s": 73,
+    "logline": "An elderly mother in Dambi Doolloo plucks one string on her late son's dusty guitar and hears a new generation singing his melody back through the August rain.",
+    "target_duration_s": 82,
     "end_card_duration_s": 3,
     "fps": 24,
     "narration_language": "om",
     "subtitle_language": "en"
   },
   "design_intent": {
-    "audience": "Oromo youth and diaspora, families from Dembi Dollo and Wallaga, and anyone who carries memory through song.",
+    "audience": "Oromo youth and diaspora, families from Dambi Doolloo and Wallaga, and anyone who carries memory through song.",
     "viewing_context": "Mobile phones (9:16 vertical in family WhatsApp/Telegram chats and TikTok/Reels) and desktop/festival screening (16:9 horizontal).",
     "target_feeling": "Quiet grief turning into unbroken pride—realizing a voice can be silenced, but a song outlives the silence."
   },
@@ -59,12 +59,12 @@
     {
       "id": "s01",
       "beat": "establish",
-      "reason": "Anchor place, season, and solitude: August rain in a Dembi Dollo highland home.",
+      "reason": "The room when he was small: the mother and the child together in the August rain.",
       "shot_size": "wide",
       "duration_s": 8,
-      "has_character": false,
+      "has_character": true,
       "motion_engine": "wan2.2",
-      "image_prompt": "dim mud-walled Ethiopian highland room, rain-streaked wooden window on left, one bright open doorway in center-right glowing into misty green rain, low empty wooden stool centered in frame",
+      "image_prompt": "wide shot of a dim mud-walled highland room in August rain, the elderly mother and her son as a child of about eight at the rain-streaked window together, the boy is a stylized painted child with short black hair and a faded blue shirt, not a portrait of any real person, low wooden stool, bright open doorway behind them",
       "motion_prompt": "slow gentle camera push-in, steady August rain falling outside the open doorway, soft shifting mist",
       "ken_burns": {
         "zoom_start": 1.0,
@@ -74,9 +74,9 @@
       },
       "seed": 101,
       "narration": {
-        "om": "Ammas Hagayya. Roobni Dambi Doolloo akkuma duriiti. Garuu sagaleen kee, kan mana kana ho'isu, hin jiru.",
-        "am": "እንደገና ነሐሴ። የደምቢ ዶሎ ዝናብ እንደ ድሮው ነው። ግን ይህን ቤት ያሞቅ የነበረው ድምፅህ የለም።",
-        "en": "August again. The Dembi Dollo rain hasn't changed—but your voice, the one that warmed this house, is gone."
+        "om": "Ammas Hagayya, ilma koo. Roobni Dambi Doolloo ammallee akkuma yeroo ati xiqqaa turtee qorqorroo kana rukkuta.",
+        "am": "እንደገና ነሐሴ፣ ልጄ። የደምቢ ዶሎ ዝናብ ልጅ ሳለህ እንደነበረው አሁንም ጣሪያውን ይመታል።",
+        "en": "August again, my son. The Dambi Doolloo rain still taps this roof, the way it did when you were small."
       },
       "music_cue": "rain ambience only, silence before guitar"
     },
@@ -88,7 +88,7 @@
       "duration_s": 8,
       "has_character": true,
       "motion_engine": "wan2.2",
-      "image_prompt": "centered medium shot of the elderly woman sitting quietly on a low wooden stool, an old dusty wooden acoustic guitar leaning against the mud wall right beside her",
+      "image_prompt": "centered medium shot of the elderly mother on a low wooden stool and her son, the same stylized painted boy of about eight with short black hair and a faded blue shirt, sitting beside her with a small tea glass and an old acoustic guitar, he is humming, warm doorway light, not a portrait of any real person",
       "motion_prompt": "locked static camera, subtle slow breathing of the elderly woman, soft flicker of natural daylight from doorway",
       "ken_burns": {
         "zoom_start": 1.0,
@@ -98,21 +98,21 @@
       },
       "seed": 102,
       "narration": {
-        "om": "Gitaarri kee bakkuma ati keessetti hafe. Ribbii ja'a qofaan, weedduu uummata keef falmu ittiin uumte.",
-        "am": "ጊታርህ ባስቀመጥከው ቦታ ቀርቷል። በስድስት ክሮች ብቻ ለሕዝብህ የሚታገሉ ዘፈኖችን ፈጠርክ።",
-        "en": "Your guitar still rests where you left it. With just six strings, you wrote songs that fought for your people."
+        "om": "Eebbisaa, gitaarri kee ammallee keenyanitti hirkatee jira. Shaayii kee dhugaa yeedalloo qabachaa, ribbii ja'aan weedduu uummataa uumta turte.",
+        "am": "ኤቢሳ፣ ጊታርህ አሁንም ግድግዳው ላይ ተደግፎ አለ። ሻይህን እየጠጣህ እያንጎራጎርክ በስድስት ክሮች ለሕዝብህ ዘፈን ትፈጥር ነበር።",
+        "en": "Eebbisaa, your guitar still leans by the wall. You would sit there humming over your tea, making fighting songs on six strings."
       },
       "music_cue": "single soft acoustic guitar harmonic enters"
     },
     {
       "id": "s03",
       "beat": "breathe_motif",
-      "reason": "Show his cultural legacy beyond music: teaching children Qubee so they could write their own names.",
-      "shot_size": "insert",
+      "reason": "Show his cultural legacy beyond music: as a child he is with the neighborhood children, learning to write their names.",
+      "shot_size": "medium",
       "duration_s": 7,
-      "has_character": false,
+      "has_character": true,
       "motion_engine": "ken_burns",
-      "image_prompt": "centered close-up of a dusty wooden acoustic guitar resting beside an open worn exercise notebook and a short piece of white chalk on a low wooden stool, warm dust motes in a dim shaft of doorway light, no legible text",
+      "image_prompt": "the same stylized painted boy of about eight with three neighborhood children of similar age sitting on the floor around a blank notebook and a stick of white chalk, the elderly mother seated just behind them, no letters and no readable text anywhere, warm dust in the doorway light, none of the children is a portrait of a real person",
       "motion_prompt": "very slow horizontal drift across the guitar strings, dust floating in light",
       "ken_burns": {
         "zoom_start": 1.02,
@@ -122,9 +122,9 @@
       },
       "seed": 103,
       "narration": {
-        "om": "Ati weellisaa qofa hin turre. Ijoolleen maqaa isaanii akka barreessan, qubee Afaan Oromoo barsiiste.",
-        "am": "አንተ ዘፋኝ ብቻ አልነበርክም። ልጆች ስማቸውን እንዲጽፉ የአፋን ኦሮሞ ፊደል ቁቤን አስተማርክ።",
-        "en": "You weren't only a singer. You taught children Qubee, so they could finally write their own names."
+        "om": "Ati weellisaa qofa hin turre. Ijoollee ollaa qubee—afaan keenyaan barreessuu—barsiistee, maqaa isaanii akka baratan goote.",
+        "am": "አንተ ዘፋኝ ብቻ አልነበርክም። የሰፈሩ ልጆች ስማቸውን መጻፍ እንዲችሉ ቁቤን—የኦሮሞ ፊደላችንን—አስተማርካቸው።",
+        "en": "You weren't just a singer. You taught neighborhood kids Qubee—our Oromo alphabet—so they could finally spell their own names."
       },
       "music_cue": "sparse guitar arpeggio, unhurried"
     },
@@ -146,9 +146,9 @@
       },
       "seed": 104,
       "narration": {
-        "om": "Namoonni kaaseetii kee dhoksaatti dhaggeeffatu turan. Anis kaaseetii fi dabtara walaloo kee ol kaa'eera.",
-        "am": "ሰዎች ካሴትህን በድብቅ ያዳምጡ ነበር። እኔም ካሴትህንና የግጥም ደብተርህን አስቀምጬዋለሁ።",
-        "en": "People listened to your cassettes in secret. I kept your old tape and notebook of poems safe."
+        "om": "Namoonni kaaseetii kee dhoksaatti dhaggeeffatu turan. Anis kaaseetii kee fi dabtara walaloo weedduu kee wayyaa koo keessa maree ol kaa'eera.",
+        "am": "ሰዎች ካሴትህን በድብቅ ያዳምጡ ነበር። እኔም አሮጌውን ካሴትህንና የዘፈን ግጥም ደብተርህን በነጠላዬ ጠቅልዬ አስቀምጬዋለሁ።",
+        "en": "People listened to your cassettes in secret. I still keep your old tape and notebook of lyrics folded in my shawl."
       },
       "music_cue": "guitar continues softly underneath voice"
     },
@@ -160,7 +160,7 @@
       "duration_s": 8,
       "has_character": true,
       "motion_engine": "ken_burns",
-      "image_prompt": "centered close-up of an open worn paper notebook with soft out-of-focus blue ink lines and doodles, her wrinkled hand resting gently beside the page in warm light, no legible letters",
+      "image_prompt": "the elderly mother and the same stylized painted boy of about eight, short black hair, faded blue shirt, he leans over an open notebook making soft blue marks that are not letters, her hand near the page, warm light, no readable text, not a portrait of any real person",
       "motion_prompt": "slow push-in on the aged paper and resting hand, soft dust",
       "ken_burns": {
         "zoom_start": 1.0,
@@ -170,9 +170,9 @@
       },
       "seed": 105,
       "narration": {
-        "om": "Qalama cuquliisaan jechoota kana barreessite. Gara Finfinnee osoo hin deemin, 'Haadha dhiiraa hin boo'in,' jettee naaf weeddiste.",
-        "am": "እነዚህን ቃላት በሰማያዊ ቀለም ጻፍክ። ወደ ፊንፊኔ ከመሄድህ በፊት 'የጀግና እናት አታልቅሺ' ብለህ ዘፈንክልኝ።",
-        "en": "You wrote these words in blue ink. Before leaving for Finfinnee, you sang to me: 'Mother of a hero, do not weep.'"
+        "om": "Qalamni cuquliisni kee ammallee dabtara kana guutee jira. Gara magaalaa guddoo Finfinnee osoo hin deemin, 'Haadha dhiiraa hin boo'in,' jettee naaf weeddiste.",
+        "am": "ሰማያዊ ቀለምህ አሁንም ይህን ደብተር ሞልቶታል። ወደ ዋና ከተማዋ ፊንፊኔ ከመሄድህ በፊት 'የጀግና እናት አታልቅሺ' ብለህ ዘፈንክልኝ።",
+        "en": "Your blue ink still fills this notebook. Before leaving for Finfinnee, the capital, you sang to me: 'Mother of a hero, do not cry.'"
       },
       "music_cue": "gentle warm chord swell"
     },
@@ -181,7 +181,7 @@
       "beat": "emotional_low",
       "reason": "The emotional nadir: the heavy silence of August 1996 hanging over the house.",
       "shot_size": "close-up",
-      "duration_s": 9,
+      "duration_s": 8,
       "has_character": true,
       "motion_engine": "wan2.2",
       "image_prompt": "centered close-up profile of the elderly woman looking out a rain-blurred window into deep blue twilight, soft raindrop shadows cast across her weathered cheek",
@@ -194,9 +194,9 @@
       },
       "seed": 106,
       "narration": {
-        "om": "Garuu Hagayya bara sagaltamii ja'a, rasaasni Finfinneetti sagalee kee dhaabe. Gaafasii as, manni kun waggootaaf callisee hafe.",
-        "am": "ግን በነሐሴ ዘጠና ስድስት በፊንፊኔ ጥይት ድምፅህን አቆመ። ከዚያ ጀምሮ ይህ ቤት ለዓመታት በዝምታ ቀረ።",
-        "en": "Then in August ninety-six, a bullet in Finfinnee silenced you. Since that night, this house has lived in silence."
+        "om": "Hagayya bara sagaltamii ja'aa, rasaasni Finfinneetti sagalee kee fudhate. Halkan sanaa as, manni kun duwwaa fi callisaa ta'e.",
+        "am": "በነሐሴ 1996 በፊንፊኔ ጥይት ድምፅህን ነጠቀን። ከዚያች ሌሊት ጀምሮ ይህ ቤት ባዶና ጸጥ ያለ ሆነ።",
+        "en": "In August 1996, a bullet in Finfinnee took your voice. Ever since that night, this house has been empty and quiet."
       },
       "music_cue": "score drops out to near-silence and rain"
     },
@@ -218,9 +218,9 @@
       },
       "seed": 107,
       "narration": {
-        "om": "Halkan kana garuu callisuun hin danda'u. Ani weellistuu miti, ilma koo—haadha si yaaddu qofa. Sagalee tokko nan yaala.",
-        "am": "ዛሬ ማታ ግን ዝም ማለት አልችልም። እኔ ዘፋኝ አይደለሁም ልጄ፣ የምናፍቅህ እናት ብቻ ነኝ። አንድ ድምፅ እሞክራለሁ።",
-        "en": "Tonight, I refuse the silence. I am not a singer, my son—only a mother who misses you. I will try one note."
+        "om": "Waggootaaf tuquu hin dandeenye. Halkan kana garuu callisni kun natti ulfaate. Ani weellistuu miti, ilma koo—mee sagalee tokko nan yaala.",
+        "am": "ለዓመታት ልነካው አልቻልኩም ነበር። ዛሬ ማታ ግን ዝምታው ከበደኝ። እኔ ዘፋኝ አይደለሁም ልጄ—እስኪ አንድ ድምፅ ልሞክር።",
+        "en": "For years I couldn't bear to touch it. Tonight, the quiet is too heavy. I'm no singer, my son—let me try one note."
       },
       "music_cue": "cue_part2_hope begins gently"
     },
@@ -229,7 +229,7 @@
       "beat": "the_spark",
       "reason": "Focus on the single physical gesture that reconnects past and present.",
       "shot_size": "insert",
-      "duration_s": 6,
+      "duration_s": 7,
       "has_character": true,
       "motion_engine": "ken_burns",
       "image_prompt": "centered macro close-up of one weathered fingertip poised on a single worn bronze guitar string over the dark soundhole, warm golden highlight on the metal string",
@@ -242,11 +242,11 @@
       },
       "seed": 108,
       "narration": {
-        "om": "Ribbii dulloome tokko qofa nan rukkuta. Isaan weellisaa ajjeesan malee, weedduu hin ajjeesne.",
-        "am": "አንድ ያረጀ ክር ብቻ እመታለሁ። ዘፋኙን ገደሉ እንጂ ዘፈኑን አልገደሉም።",
-        "en": "I pluck one worn string. They killed the singer—never the song."
+        "om": "Ribbii dulloome tokko qofa... Isaan weellisaa ajjeesan, Eebbisaa. Weedduu garuu hin ajjeesne.",
+        "am": "አንድ ያረጀ ክር ብቻ... ዘፋኙን ገደሉ እንጂ ኤቢሳ፣ ዘፈኑን አልገደሉም።",
+        "en": "Just one old string... They killed the singer, Eebbisaa. Never the song."
       },
-      "music_cue": "one clear resonant guitar note rings and lingers"
+      "music_cue": "one A3 guitar pluck, 1.5s into the shot, rings about 2.5s"
     },
     {
       "id": "s09",
@@ -256,7 +256,7 @@
       "duration_s": 8,
       "has_character": true,
       "motion_engine": "ken_burns",
-      "image_prompt": "centered intimate close-up of the elderly woman turning slightly toward the bright open doorway, warm golden light catching a quiet proud tear-bright smile on her lined face",
+      "image_prompt": "the elderly mother in the foreground turning toward the open doorway, and in the rainy light behind her several stylized painted children singing, simple clothes, not portraits of real people, no readable text",
       "motion_prompt": "very slow push-in, gentle warm glow brightening across her eyes",
       "ken_burns": {
         "zoom_start": 1.0,
@@ -266,11 +266,35 @@
       },
       "seed": 109,
       "narration": {
-        "om": "Dhaggeeffadhu, ilma koo. Balbala koo duubaan dhaloonni haaraan, kan gaafas hin dhalanne, walaloo kee hundumaa beeka.",
-        "am": "ስማ ልጄ። ከበሬ ጀርባ ያኔ ያልተወለደ አዲስ ትውልድ ግጥምህን ሁሉ ያውቃል።",
-        "en": "Listen, my son. Beyond my doorway, a new generation—not even born back then—knows every word you wrote."
+        "om": "Dhaggeeffadhu, ilma koo. Balbala koo alaan ijoolleen gaafas hin dhalanne har'allee jecha ati weeddiste hunda beeku.",
+        "am": "ስማ ልጄ። ከበሬ ውጭ ያኔ ያልተወለዱ ልጆች ዛሬም የዘፈንከውን ስንኝ ሁሉ ያውቃሉ።",
+        "en": "Listen, my son. Outside my door, children who weren't even born back then still know every line you sang."
       },
-      "music_cue": "warm distant hum rises with acoustic guitar"
+      "music_cue": "cue_part2_hope enters, warm chordal hum and rain, ducked under the voice"
+    },
+    {
+      "id": "s10",
+      "beat": "the_answer",
+      "reason": "Close the proverb in Dambi Doolloo rain: the mother and the children are in the doorway, and she does not cry.",
+      "shot_size": "wide",
+      "duration_s": 9,
+      "has_character": true,
+      "motion_engine": "ken_burns",
+      "image_prompt": "the elderly mother in the bright doorway and the same stylized painted children standing in the August rain on the wet path, singing back toward her, not portraits of real people, no readable text",
+      "motion_prompt": "slow push toward the rainy doorway, rain falling, silhouettes barely moving",
+      "ken_burns": {
+        "zoom_start": 1.0,
+        "zoom_end": 1.06,
+        "pan_x": 0.0,
+        "pan_y": 0.0
+      },
+      "seed": 110,
+      "narration": {
+        "om": "Isaan dhageessaa? Rooba Dambi Doolloo keessaan sagalee kee deebisanii siif weeddisaa jiru. Halkan kana, ilma koo... ani hin boo'u.",
+        "am": "ትሰማቸዋለህ? በደምቢ ዶሎ ዝናብ ውስጥ ዘፈንህን መልሰው እየዘመሩልህ ነው። ዛሬ ማታ ልጄ... እኔ አላለቅስም።",
+        "en": "Hear them? Through the Dambi Doolloo rain, they are singing your songs right back to you. Tonight, my son... I will not cry."
+      },
+      "music_cue": "hum swells in the pauses and after I will not cry"
     }
   ]
 }

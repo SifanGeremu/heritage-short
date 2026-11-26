@@ -37,8 +37,10 @@ def find_storyboard() -> Path:
     env = os.environ.get("STORYBOARD")
     names = [Path(env)] if env else []
     names += [
-        Path("schema/storyboard.json"),
         Path("storyboard.json"),
+        Path("schema/storyboard.json"),
+        Path("/kaggle/working/storyboard.json"),
+        Path("/kaggle/working/heritage-short/storyboard.json"),
         Path("/kaggle/working/schema/storyboard.json"),
         Path("/kaggle/working/heritage-short/schema/storyboard.json"),
     ]

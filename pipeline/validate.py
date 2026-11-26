@@ -12,8 +12,8 @@ SCHEMA_PATH = ROOT / "schema" / "storyboard.schema.json"
 
 
 def storyboard_path() -> Path:
-    # ponytail: the assignment names storyboard.json at the repo root. This repo
-    # keeps it next to the schema. Root wins once that file is non-empty.
+    # ponytail: root is the contract. schema/storyboard.json remains a fallback
+    # so an older checkout still validates. Root wins when it is non-empty.
     root = ROOT / "storyboard.json"
     nested = ROOT / "schema" / "storyboard.json"
     if root.is_file() and root.stat().st_size > 0:
