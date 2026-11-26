@@ -4,12 +4,14 @@
 The storyboard names the engine. ken_burns is zoompan. wan2.2 and hunyuan1.5
 are read and not called: the same zoompan move is the fallback, and the run
 says so. Movement comes from motion_prompt: push-in, pull-back, or drift.
-A locked camera gets a smaller drift so it is not a frozen frame. Shots with
-no keyframe are skipped. A clip is reused when the keyframe and the move match.
+A locked camera gets a smaller drift so it is not a frozen frame. A shot with
+no keyframe copies the previous shot's clip and logs a hold. A clip is reused
+when the keyframe and the move match.
 """
 
 import hashlib
 import json
+import shutil
 import subprocess
 import sys
 import time
@@ -46,7 +48,7 @@ def move_kind(prompt: str) -> str:
     text = prompt.lower()
     if "pull-back" in text or "pull back" in text:
         return "pull-back"
-    if "push-in" in text or "push in" in text:
+    if "push-in" in text or "push in" in text or "push toward" in text or "push towards" in text:
         return "push-in"
     if "drift" in text:
         return "drift"
@@ -106,6 +108,19 @@ def save_cache(cache: dict) -> None:
     CACHE_PATH.write_text(json.dumps(cache, indent=2) + "\n", encoding="utf-8")
 
 
+def hold_digest(sid: str, source: Path) -> str:
+    payload = json.dumps(
+        {"hold": sid, "source": hashlib.sha256(source.read_bytes()).hexdigest()},
+        sort_keys=True,
+    )
+    return hashlib.sha256(payload.encode()).hexdigest()
+
+
+def copy_hold(source: Path, dest: Path) -> None:
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(source, dest)
+
+
 def keyframe_for(sid: str) -> Path | None:
     found = []
     for ext in ("jpg", "jpeg", "png", "webp"):
@@ -161,13 +176,42 @@ def main() -> int:
     cache = load_cache()
     made = 0
     skipped = []
+    last_clip: Path | None = None
     shots = board.get("shots") or []
     for shot in shots:
         sid = str(shot.get("id"))
         image = keyframe_for(sid)
         if image is None:
-            print(f"{sid}: no keyframe, skipped")
-            skipped.append(sid)
+            if last_clip is None:
+                print(f"{sid}: no keyframe, skipped")
+                skipped.append(sid)
+                continue
+            digest = hold_digest(sid, last_clip)
+            dest = OUT_DIR / f"{sid}_{digest[:8]}.mp4"
+            cached = cache.get(digest)
+            cached_path = ROOT / cached if isinstance(cached, str) else None
+            if (cached_path is not None and cached_path.is_file()) or dest.is_file():
+                path = cached_path if cached_path is not None and cached_path.is_file() else dest
+                cache[digest] = _rel(path)
+                print(f"{sid}: hold cached {path.name}")
+                last_clip = path
+                made += 1
+                continue
+            record = {
+                "stage": "shots",
+                "provider": "ffmpeg",
+                "model": "hold",
+                "parameters": {"source": _rel(last_clip), "shot": sid},
+                "output_path": _rel(dest),
+            }
+            started = time.perf_counter()
+            copy_hold(last_clip, dest)
+            cache[digest] = _rel(dest)
+            save_cache(cache)
+            _log(record, started, "ok")
+            print(f"{sid}: hold {dest.name} from {last_clip.name}")
+            last_clip = dest
+            made += 1
             continue
         duration = shot.get("duration_s")
         if isinstance(duration, bool) or not isinstance(duration, int) or duration < 1:
@@ -195,6 +239,7 @@ def main() -> int:
             path = cached_path if cached_path is not None and cached_path.is_file() else dest
             cache[digest] = _rel(path)
             print(f"{sid}: cached {path.name}")
+            last_clip = path
             made += 1
             continue
         record = {
@@ -219,6 +264,7 @@ def main() -> int:
         save_cache(cache)
         _log(record, started, "ok")
         print(f"{sid}: {dest.name} ({kind}, {duration}s)")
+        last_clip = dest
         made += 1
     save_cache(cache)
     print(f"shots {made}/{len(shots)}" + (f", skipped {' '.join(skipped)}" if skipped else ""))
@@ -227,6 +273,7 @@ def main() -> int:
 
 def _self_check() -> None:
     assert move_kind("slow gentle camera push-in") == "push-in"
+    assert move_kind("slow push toward the rainy doorway") == "push-in"
     assert move_kind("slow pull-back deeper into the room") == "pull-back"
     assert move_kind("very slow horizontal drift across the strings") == "drift"
     assert resolve_engine("ken_burns") == ("ken_burns", None)
@@ -238,6 +285,18 @@ def _self_check() -> None:
     assert cache_key(b"a", {"motion": "hold"}) != cache_key(b"a", {"motion": "drift"})
 
     import tempfile
+
+    with tempfile.TemporaryDirectory() as tmp:
+        folder = Path(tmp)
+        source = folder / "s09.mp4"
+        source.write_bytes(b"clip-bytes")
+        digest = hold_digest("s10", source)
+        dest = folder / f"s10_{digest[:8]}.mp4"
+        copy_hold(source, dest)
+        assert dest.read_bytes() == b"clip-bytes"
+        other = folder / "other.mp4"
+        other.write_bytes(b"other")
+        assert hold_digest("s10", other) != digest
 
     with tempfile.TemporaryDirectory() as tmp:
         folder = Path(tmp)
