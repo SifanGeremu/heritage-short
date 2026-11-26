@@ -42,11 +42,13 @@ The reference sheet did the same job for pictures. Four seeds, one kept (seed 20
 
 ## A suggested practice that did not
 
-The practice was: change the voice to a woman, pad both ends of the wav, and the reading will survive a listen. That is E-005. The instinct it was meant to beat was "the male voice and the clipped edges were the whole problem" (F-002). The change was real. Ten `om-ayyaantuu` calls, all `ok`, 250 ms in front and 350 ms after, and those wavs are the ones in `timing.json`.
+The practice was one contract. Every stage reads `storyboard.json`, and each shot's `duration_s` is part of that contract. My instinct after F-002 was that a clipped word is worse than a longer film, so the voice should set the length.
 
-The listen did not agree. Caaltuu, on the radio cut: "There's no age in her throat, no heaviness." Leensaa heard *chukuliisaan* and said, "Okay, this is AI." Boonaa listed *q*, *c*, and *dh* going flat, and a word cut to "weeddi—". Chaltu, Beka, and Dawit heard the same consonants on the 90-second film. Padding and a female stock voice fixed the gender and the worst edge cuts. They did not fix the age or the Oromo consonants. The film is still on that voice, and F-011 shows a fresh take of the teaching line saying `baleessuu` where the source says `barreessuu`.
+The radio cut still follows the board. The ten shot durations sum to 79 seconds, the end card adds 3, and `outputs/radio_cut.mp4` is 82.000 seconds. A line longer than its shot is sped to fit. s02, s04, s05, and s07 are still sped on that cut.
 
-Wan 2.2 was not this test. It was not run. F-006 says so, and there is still no Wan line in the log.
+The picture export follows the wav. `picture_slots` in `pipeline/assemble.py` holds each frame for that line at 0.88× (`STORY_TEMPO`), plus the breath before the next line. `collect_inputs` copies `shot["duration_s"]` onto the shot and the timeline never reads it. Both exports are 90.042 seconds, which is 90 seconds plus one frame at 24 fps. The board says 79. The cut Chaltu, Beka, and Dawit watched is the voice's clock.
+
+The contract still names the shots, the prompts, the seeds, and the line. On length, the instinct won. The film is one frame over the 60–90 second cap because the stage that exports it does not obey the durations in the file it claims as its contract.
 
 ## Beyond the floor
 
