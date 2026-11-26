@@ -20,7 +20,7 @@
     "id": "mother_dembi_dollo",
     "is_real_person": false,
     "description": "elderly Oromo woman in her late sixties, deep-lined weathered face, silver-gray hair tucked under a faded cream cotton headscarf, worn dark-brown traditional dress with subtle woven border, thin weathered hands",
-    "reference_seed": 701,
+    "reference_seed": 201,
     "reference_prompts": [
       "character turnaround portrait, front and three-quarter view, neutral tender expression, soft warm side light, neutral mud-wall background",
       "medium shot seated on a low wooden stool beside an old acoustic guitar, dramatic warm doorway light"
@@ -63,7 +63,7 @@
       "shot_size": "wide",
       "duration_s": 8,
       "has_character": true,
-      "motion_engine": "wan2.2",
+      "motion_engine": "ken_burns",
       "image_prompt": "wide shot of a dim mud-walled highland room in August rain, the elderly mother and her son as a child of about eight at the rain-streaked window together, the boy is a stylized painted child with short black hair and a faded blue shirt, not a portrait of any real person, low wooden stool, bright open doorway behind them",
       "motion_prompt": "slow gentle camera push-in, steady August rain falling outside the open doorway, soft shifting mist",
       "ken_burns": {
@@ -83,11 +83,11 @@
     {
       "id": "s02",
       "beat": "introduce_character",
-      "reason": "Introduce the mother and establish the untouched guitar as the visual symbol of absence.",
+      "reason": "The private memory: the mother and the child with his tea and the guitar, humming.",
       "shot_size": "medium",
       "duration_s": 8,
       "has_character": true,
-      "motion_engine": "wan2.2",
+      "motion_engine": "ken_burns",
       "image_prompt": "centered medium shot of the elderly mother on a low wooden stool and her son, the same stylized painted boy of about eight with short black hair and a faded blue shirt, sitting beside her with a small tea glass and an old acoustic guitar, he is humming, warm doorway light, not a portrait of any real person",
       "motion_prompt": "locked static camera, subtle slow breathing of the elderly woman, soft flicker of natural daylight from doorway",
       "ken_burns": {
@@ -113,7 +113,7 @@
       "has_character": true,
       "motion_engine": "ken_burns",
       "image_prompt": "the same stylized painted boy of about eight with three neighborhood children of similar age sitting on the floor around a blank notebook and a stick of white chalk, the elderly mother seated just behind them, no letters and no readable text anywhere, warm dust in the doorway light, none of the children is a portrait of a real person",
-      "motion_prompt": "very slow horizontal drift across the guitar strings, dust floating in light",
+      "motion_prompt": "very slow horizontal drift across the children and the chalk, dust floating in the doorway light",
       "ken_burns": {
         "zoom_start": 1.02,
         "zoom_end": 1.1,
@@ -183,7 +183,7 @@
       "shot_size": "close-up",
       "duration_s": 8,
       "has_character": true,
-      "motion_engine": "wan2.2",
+      "motion_engine": "ken_burns",
       "image_prompt": "centered close-up profile of the elderly woman looking out a rain-blurred window into deep blue twilight, soft raindrop shadows cast across her weathered cheek",
       "motion_prompt": "static locked camera, raindrops slide slowly down the dark window glass, subtle blink",
       "ken_burns": {
@@ -207,7 +207,7 @@
       "shot_size": "medium",
       "duration_s": 8,
       "has_character": true,
-      "motion_engine": "wan2.2",
+      "motion_engine": "ken_burns",
       "image_prompt": "centered medium shot of the elderly woman carefully holding the old wooden guitar across her lap, warm golden rim light from the open doorway illuminating her shoulder and headscarf",
       "motion_prompt": "slow gentle push-in toward her and the guitar, she gently steadies the wooden neck",
       "ken_burns": {
@@ -246,7 +246,7 @@
         "am": "አንድ ያረጀ ክር ብቻ... ዘፋኙን ገደሉ እንጂ ኤቢሳ፣ ዘፈኑን አልገደሉም።",
         "en": "Just one old string... They killed the singer, Eebbisaa. Never the song."
       },
-      "music_cue": "one A3 guitar pluck, 1.5s into the shot, rings about 2.5s"
+      "music_cue": "one A3 guitar pluck, 3.3s into the shot, rings about 2.5s"
     },
     {
       "id": "s09",
@@ -281,7 +281,7 @@
       "has_character": true,
       "motion_engine": "ken_burns",
       "image_prompt": "the elderly mother in the bright doorway and the same stylized painted children standing in the August rain on the wet path, singing back toward her, not portraits of real people, no readable text",
-      "motion_prompt": "slow push toward the rainy doorway, rain falling, silhouettes barely moving",
+      "motion_prompt": "slow push-in toward the rainy doorway, rain falling, silhouettes barely moving",
       "ken_burns": {
         "zoom_start": 1.0,
         "zoom_end": 1.06,
