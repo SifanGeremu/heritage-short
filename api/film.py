@@ -12,12 +12,11 @@ import sys
 import tempfile
 from http.server import BaseHTTPRequestHandler
 from pathlib import Path
+from urllib.parse import urlparse
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "family"))
-
-from board import build  # noqa: E402
-from render import render  # noqa: E402
+PAGE = ROOT / "family" / "static" / "index.html"
 
 
 def _ffmpeg() -> None:
@@ -43,6 +42,17 @@ class handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(data)
 
+    def do_GET(self) -> None:
+        if urlparse(self.path).path not in ("/", "/index.html"):
+            self.send_error(404)
+            return
+        data = PAGE.read_bytes()
+        self.send_response(200)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header("Content-Length", str(len(data)))
+        self.end_headers()
+        self.wfile.write(data)
+
     def do_POST(self) -> None:
         length = int(self.headers.get("Content-Length") or "0")
         if length <= 0 or length > 20_000:
@@ -52,6 +62,9 @@ class handler(BaseHTTPRequestHandler):
             answers = json.loads(self.rfile.read(length))
             if not isinstance(answers, dict):
                 raise ValueError("expected a letter")
+            from board import build
+            from render import render
+
             board = build(answers)
             _ffmpeg()
             with tempfile.TemporaryDirectory() as tmp:

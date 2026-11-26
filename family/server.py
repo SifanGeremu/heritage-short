@@ -104,7 +104,7 @@ def _start(board: dict, dest: Path, film_id: str) -> None:
     threading.Thread(target=run, daemon=True).start()
 
 
-class Handler(BaseHTTPRequestHandler):
+class FamilyHandler(BaseHTTPRequestHandler):
     def log_message(self, fmt: str, *args) -> None:
         print(f"{self.address_string()} {fmt % args}")
 
@@ -212,7 +212,7 @@ class Handler(BaseHTTPRequestHandler):
 
 def main() -> None:
     FAMILY.mkdir(parents=True, exist_ok=True)
-    server = ThreadingHTTPServer((HOST, PORT), Handler)
+    server = ThreadingHTTPServer((HOST, PORT), FamilyHandler)
     print(f"http://{HOST}:{PORT}", flush=True)
     server.serve_forever()
 

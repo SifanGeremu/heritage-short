@@ -1,5 +1,7 @@
 .venv
 outputs
 .git
+.env
+.env.*
 notebooks
 **/__pycache__

@@ -6,9 +6,9 @@ A film about an elderly mother in Dambi Doolloo and the song her son left behind
 
 A relative opens one page, answers three things, and gets a short vertical film. Nothing to install.
 
-**https://swift-iron-xkigogw.tmp.now**
+**https://faaruun.vercel.app**
 
-Vercel hosts that page for free on the Hobby plan. The hosted copy is a dry preview: flat frames, a quiet tone, no Addis call, no Cloudflare call. A real film, with her voice and the painted frames, is still `make family` on this machine. The keys stay in `.env`. Details are in `FAMILY.md`.
+Vercel hosts that page for free on the Hobby plan, and the deploy comes from this GitHub repository, not from a laptop. The project name is `faaruun`. The address `heritage-short.vercel.app` is a different film and is not this one. The hosted copy is a dry preview: flat frames, a quiet tone, no Addis call, no Cloudflare call. A real film, with her voice and the painted frames, is still `make family` on this machine. The keys stay in `.env`. Details are in `FAMILY.md`.
 
 One command rebuilds it from the storyboard:
 
