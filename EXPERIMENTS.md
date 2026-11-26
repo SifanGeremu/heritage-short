@@ -1,6 +1,6 @@
 # Experiments
 
-Each entry is one change, checked against `runs.jsonl` or a file on disk. Ten are recorded. The listening choice between music seeds is the one result that is not in the log: the storyboard locks seed 303, and the log only has latency.
+Each entry is one change, checked against `runs.jsonl` or a file on disk. Ten are recorded. The listening choice between music seeds is the one result that is not in the log: the storyboard locks seed 303, and the log only has latency. The reason is in E-009.
 
 ## E-001. Validation stops when a shot has no reason
 
@@ -8,7 +8,7 @@ Hypothesis: `make validate` accepts the storyboard, and deleting one `reason` fa
 
 Change: Ran `make validate`. Removed `shots[0].reason` on s01, ran it again, restored the file.
 
-Result: The intact board printed `ok` and exited 0. With `reason` removed, the validator printed `$.shots[0].reason: 'reason' is a required property` and exited 1. Restored, `make validate` passed again. The board at that moment still had s01–s10. It is nine shots now. See E-010.
+Result: The intact board printed `ok` and exited 0. With `reason` removed, the validator printed `$.shots[0].reason: 'reason' is a required property` and exited 1. Restored, `make validate` passed again. The board at that moment still had s01–s10. E-010 then cut it to nine shots. Storyboard v3 put s10 back. The board now is ten shots, 79 seconds.
 
 ## E-002. A successful Gemini TTS call is not an Afaan Oromo reading
 
@@ -40,7 +40,7 @@ Hypothesis: A female Addis voice, with silence kept on both ends of each wav, wi
 
 Change: Ten calls, voice `om-ayyaantuu`, language `om`, format `wav_44100`. Each file padded 250 ms / 350 ms and faded 15 ms. Logged cost is the Voices 2 list price, 5 ETB per minute.
 
-Result: All ten status `ok`. Combined latency 88.9 s. Combined list price 5.12 ETB including a leftover s10 line. The nine lines in the cut (s01–s09) are 60.49 s of audio and 4.59 ETB. Those wavs are the ones `timing.json` points at for s01–s09, and they are the voice in `outputs/film_9x16.mp4`.
+Result: All ten status `ok`. Combined latency 88.9 s. Combined list price 5.12 ETB including a leftover s10 line. The nine lines in that cut (s01–s09) are 60.49 s of audio and 4.59 ETB. Those wavs were the voice in the 72.5-second export. The films on disk now use the 26 November retakes in `outputs/narration/timing.json`: ten lines, 75.89 s, 5.82 ETB. See COSTS.md.
 
 ## E-006. Four reference seeds, one face kept
 
@@ -64,7 +64,7 @@ Hypothesis: A slow FFmpeg zoom on the keyframe is enough motion for a narrated f
 
 Change: `pipeline/shots.py` maps `motion_prompt` to push-in, pull-back, drift, or hold, and renders 24 fps zoompan. Nine clips, 25 November. Combined FFmpeg latency 24.1 s. Cache key is the keyframe bytes plus the move.
 
-Result: All nine status `ok`. No Wan line exists in `runs.jsonl`. The storyboard still says `motion_engine: wan2.2` on s01, s02, s06, and s07. That field is not read. Re-running `make shots` with the same jpgs and prompts hits the cache.
+Result: All nine status `ok`. No Wan line exists in `runs.jsonl`. The storyboard still says `motion_engine: wan2.2` on s01, s02, s06, and s07. On 26 November `shots.py` was changed so it reads that field, prints that the video model was not called, and keeps the cached zoom. Re-running `make shots` with the same jpgs and prompts still hits the cache. Wan itself was still not run.
 
 ## E-009. Three ACE-Step seeds, one selected
 
@@ -72,12 +72,29 @@ Hypothesis: Three instrumental seeds at 68 BPM in A minor will give a bed that c
 
 Change: ACE-Step 1.5 on Kaggle, `MPLBACKEND=Agg` after the notebook crashed on Kaggle's inline matplotlib backend. Seeds 301, 302, 303. Captions are the two cues in the storyboard (sparse guitar, then a warmer resolve). `instrumental: true`.
 
-Result: From `outputs/music/latencies.json` and `candidates.json`: 1.701 GPU minutes. Seed 301, 18.373 s, 84 s of audio. Seed 302, 13.288 s, 84 s. Seed 303, 13.302 s, 84 s. All three logged status `ok`, cost 0. `music.selected_seed` is 303, and `assemble.py` refuses to run if that wav is missing. The log does not record a listening vote. 303 is the seed in the film. 301 and 302 stay on disk as the rejected takes.
+Result: From `outputs/music/latencies.json` and `candidates.json`: 1.701 GPU minutes. Seed 301, 18.373 s, 84 s of audio. Seed 302, 13.288 s, 84 s. Seed 303, 13.302 s, 84 s. All three logged status `ok`, cost 0. `music.selected_seed` is 303, and `assemble.py` refuses to run if that wav is missing. The log has the latency and not the vote. I kept 303 because it was the best listen of the three: the music stays alive, and so does the story. 301 and 302 stay on disk as the rejected takes.
 
 ## E-010. Drop s10 rather than wait a day for one keyframe
 
 Hypothesis: A nine-shot cut still lands inside 60–90 seconds and still carries the ending.
 
-Change: s10 had narration (`s10_3ad6d824.wav`, 6.9 s, 0.525 ETB) and no picture. The shot was removed from `schema/storyboard.json`. The closing beat stayed on s09 (the close-up at the door).
+Change: s10 had narration (`s10_3ad6d824.wav`, 6.9 s, 0.525 ETB) and no picture. The shot was removed from `storyboard.json`. The closing beat stayed on s09 (the close-up at the door).
 
-Result: Shot durations now sum to 70 seconds. `make validate` accepts the board. The export is 72.5 seconds with the 3-second "Made with AI" card. The Amharic lines on each shot were never synthesized. `tts.languages_to_benchmark` lists `om` and `am`. Only `om` was spoken.
+Result: At that point the shot durations summed to 70 seconds and `make validate` accepted the board. The export was 72.5 seconds with the 3-second "Made with AI" card. The 26 November listens put s10 back (DESIGN.md). The board on disk is ten shots, 79 seconds, and both picture exports are 90.0 seconds. A full Amharic narration was still not synthesized. E-011 speaks one Amharic sentence from this board.
+
+## E-011. The same four fragments on Gemini TTS and on Addis
+
+Hypothesis: `gemini-3.8-flash-tts`, with no language code, will now return audio for the Oromo words listeners failed and for one Amharic sentence. Addis, sent an explicit language code, will match the source on more tokens.
+
+Change: 26 November 2026, `pipeline/benchmark_lang.py`. Four slices of `storyboard.json`, not a new film. Oromo on Gemini voice Kore and on Addis `om-ayyaantuu`. Amharic on Kore and on Addis `am-meron` (catalog voice, not auditioned for age). Addis Scribe then transcribed each wav. The first scribe calls uploaded the path string and were rejected (`Cannot decode audio`). The retry uploaded the wav bytes. One Gemini scribe call, the ink line, returned "Inference is temporarily unavailable" and succeeded on a second try. Token errors are edits after lowercasing and stripping punctuation. Scribe is an Addis model, so the same company is scoring both speakers. This is not a person's ear, and it is not the five-person blind test in the brief.
+
+Result: All eight TTS calls are `ok` in `runs.jsonl`. Gemini cost 0. Latencies 5.239, 9.797, 7.376, 7.026 seconds. Addis latencies 10.005, 11.019, 8.249, 8.122 seconds. Addis list price 1.2884 ETB for 15.46 seconds of audio. Scribe's price was not in the response, so those lines are cost 0. Token errors, out of 7, 12, 8, and 7 source tokens:
+
+| Probe | Source slice | Gemini transcript | Errors | Addis transcript | Errors |
+| --- | --- | --- | --- | --- | --- |
+| om-guitar | Eebbisaa, gitaarri kee ammallee keenyanitti hirkatee jira. | eebbisaa gitaarrii kee ammalee keenya natti hirkatee jira | 4 | eebbisaa gitaarri kee ammallee keenya nitti hirkatee jira | 2 |
+| om-qubee | Ijoollee ollaa qubee—afaan keenyaan barreessuu—barsiistee, maqaa isaanii akka baratan goote. | ijoollee ollaa qubee afaan keenyan barreessuu barsiiste maqaasaanii akka baratan goote | 4 | ijoollee ollaa qubee afaan keenyan baleessuu barsiistee maqaa isaanii akka baratan goote | 2 |
+| om-ink | Qalamni cuquliisni kee ammallee dabtara kana guutee jira. | kalam cuquliisni kee ammaallee daftara kana guutee jira | 3 | qalamni cuquliisni kee ammallee dabtara kana guutee jira | 0 |
+| am-guitar | ኤቢሳ፣ ጊታርህ አሁንም ግድግዳው ላይ ተደግፎ አለ። | ቢሳ ጊታር አሁንም ግድግዳው ላይ ተደግፎ አለ | 2 | ኤቢሳ ጊታር አሁንም ግድግዳው ላይ ተደግፎ አለ | 1 |
+
+Gemini 13 errors of 34 tokens. Addis 5 of 34. `gitaarri`, `qubee`, and `cuquliisni` came back from Addis. Gemini wrote `gitaarrii` and `kalam`, and it kept `qubee` and `cuquliisni`. On the teaching line Addis wrote `baleessuu` where the source says `barreessuu`. In Amharic, Addis kept `ኤቢሳ` and both voices dropped the `ህ` on `ጊታርህ`. Gemini wrote `ቢሳ`. The film stays on `om-ayyaantuu`. There is still no full Amharic cut. The wavs are `outputs/benchmark/`. The numbers are also in `outputs/benchmark/summary.json`.

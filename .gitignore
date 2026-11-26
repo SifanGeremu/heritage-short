@@ -149,6 +149,9 @@ settings.local.json
 *.pem
 *.key
 
+# Local copy of the assignment brief. Not a submission file.
+DOCS/
+
 # ==========================================
 # System, IDE & Temp Files
 # ==========================================

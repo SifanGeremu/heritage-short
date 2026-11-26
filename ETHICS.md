@@ -2,9 +2,13 @@
 
 ## Consent
 
+No living person's face or voice is in the film, and no consent form was collected because there is no likeness to authorize. The mother is a painted character. `character.is_real_person` is false. The narrator is Addis stock voice `om-ayyaantuu`, not a clone and not a family recording. Eebbisaa Addunyaa is named in the narration. He is not pictured and he is not voiced. In the memory shots the child is a painted boy of about eight, and the image prompts say he is not a portrait of a real person.
+
 The film is a fictional tribute. The person on screen is a stylized, painterly Oromo mother in Dembi Dollo. She is not a portrait of a living or a dead person, and the storyboard marks her `is_real_person: false`. No real face, name, or voice is reproduced. The narration is Addis AI voice `om-ayyaantuu`, a stock voice, not a clone of anyone in the family. No home recording was uploaded to a provider.
 
-The story uses a real place (Dembi Dollo), a real month in the memory it is drawn from (August 1996), and a real craft (Qubee, the guitar, the cassette). Those are the teller's material. They are not a likeness.
+The narration now says the name Eebbisaa Addunyaa. He is a public historical figure. The line is spoken by the stock voice `om-ayyaantuu`, not by a clone of his voice. The picture is not his face. In the memory shots he is a stylized painted child of about eight, and the other children are painted the same way. None of them is a likeness of the man. `character.is_real_person` stays false. The name was written into the storyboard only after this note, because the English listeners could not tell who the son was without it.
+
+The story uses a real place (Dambi Doolloo), a real month in the memory it is drawn from (August 1996), and a real craft (Qubee, the guitar, the cassette). Those are the teller's material. They are not a likeness.
 
 ## Licences
 
@@ -19,7 +23,7 @@ The story uses a real place (Dembi Dollo), a real month in the memory it is draw
 
 ## Labelling
 
-The last three seconds of both exports are a card that reads "Made with AI". The public post, when it goes up, uses the platform's AI-content disclosure. SynthID or C2PA metadata that a provider embedded is left in the file. Subtitles are burned in by FFmpeg and are not presented as something the image model wrote. No words were asked of the image model. The style block forbids readable text in the frame.
+The last three seconds of both exports are a card that reads "Made with AI". On 26 November 2026, Girma and a younger viewer said that card, coming right after she will not cry, broke the feeling. It stays. The assignment grades that disclosure. The public post, when it goes up, uses the platform's AI-content disclosure. SynthID or C2PA metadata that a provider embedded is left in the file. Subtitles are burned in by FFmpeg and are not presented as something the image model wrote. No words were asked of the image model. The style block forbids readable text in the frame.
 
 ## Privacy
 

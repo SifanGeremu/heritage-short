@@ -1,9 +1,9 @@
 # Architecture
 
-Five stages share one contract, `schema/storyboard.json`. Each stage reads that file and writes its own directory under `outputs/`. Nothing in a later stage reaches back into a provider. Assembly only sees files on disk.
+Five stages share one contract, `storyboard.json`. Each stage reads that file and writes its own directory under `outputs/`. Nothing in a later stage reaches back into a provider. Assembly only sees files on disk.
 
 ```
-schema/storyboard.json
+storyboard.json
         │
         ▼
    validate.py          schema + shot ids unique + duration sum inside 60–90s
@@ -20,9 +20,9 @@ schema/storyboard.json
 
 ## Contract
 
-The schema requires a `reason` on every shot, a duration, an image prompt, a motion prompt, and narration in Oromo and English. `validate.py` checks the schema, then checks invariants the schema does not: shot ids are unique, and the sum of shot `duration_s` is between 60 and 90. Music-cue durations are not added to that sum. The current board is nine shots, 70 seconds, plus a 3-second end card. The exported film is 72.5 seconds because lines overlap the crossfade and the voice sets the hold.
+The schema requires a `reason` on every shot, a duration, an image prompt, a motion prompt, and narration in Oromo and English. `validate.py` checks the schema, then checks invariants the schema does not: shot ids are unique, and the sum of shot `duration_s` is between 60 and 90. Music-cue durations are not added to that sum. The current board is ten shots. Those durations sum to 79 seconds, inside the 60–90 check. The end card is another 3 seconds. The radio cut is 82.000 seconds. Both picture exports are 90.042 seconds, which is 90 seconds plus one frame at 24 fps. The picture runs longer than the board because each line is slowed to 0.88× and the frame holds to the voice.
 
-Prompts, seeds, the voice, and `music.selected_seed` live in the storyboard, not in the stage scripts. The narration script does hard-code the voice name `om-ayyaantuu` so a storyboard edit of `tts.voice_name` alone does not retake the audio. Change the constant in `pipeline/stage_narration.py` and the storyboard together.
+Prompts, seeds, the voice, and `music.selected_seed` live in the storyboard, not in the stage scripts. Narration reads `tts.voice_name` and `project.narration_language` and does not replace them. The film's voice is `om-ayyaantuu` because that is the name in the storyboard. An empty `voice_name` stops the stage.
 
 ## Caching
 
@@ -34,7 +34,7 @@ A stage hashes the inputs that would change the output and stores the path in a 
 | Keyframes | prompt, seed, reference image bytes | the jpg for that hash is on disk |
 | Shots | keyframe bytes, move kind, frame count | the mp4 for that hash is on disk |
 
-Change one Oromo line, run `make narration` then `make assemble`, and the other eight wavs are not resynthesized. Keyframes and shots do not move. `make shots` never calls a video model. It classifies `motion_prompt` into push-in, pull-back, drift, or hold, and runs FFmpeg `zoompan` at 1080×1920, 24 fps, zoom never below 1. The storyboard field `motion_engine` still says `wan2.2` on four shots. The shots stage does not read that field. Wan 2.2 was not called. The pan-and-zoom is the fallback the brief allows when the video quota is not spent.
+Change one Oromo line, run `make narration` then `make assemble`, and the other wavs are not resynthesized. Keyframes and shots do not move. `make shots` reads `motion_engine`. `ken_burns` is FFmpeg `zoompan` at 1080×1920, 24 fps, zoom never below 1, and the move comes from `motion_prompt` (push-in, pull-back, drift, or hold). `wan2.2` and `hunyuan1.5` are printed as "video model not called" and rendered with that same zoompan. s01, s02, s06, and s07 still request `wan2.2`. Wan was not called. The cache key is the keyframe and the move, so reading the engine does not rebuild a clip that is already on disk.
 
 ## Retries
 
@@ -42,7 +42,7 @@ Change one Oromo line, run `make narration` then `make assemble`, and the other 
 
 ## When a call fails
 
-Keyframes save after every successful shot. A timeout on one shot leaves the earlier jpgs in place. The next `make keyframes` prints `cached` for those and tries only the missing shot. On 25 November the missing shot was s10: the read timed out at 145s, and the retry came back HTTP 429, daily free allocation of 10,000 neurons used up. s01–s09 stayed. The storyboard was then cut to those nine shots.
+Keyframes save after every successful shot. A timeout on one shot leaves the earlier jpgs in place. The next `make keyframes` prints `cached` for those and tries only the missing shot. On 25 November the missing shot was s10: the read timed out at 145s, and the retry came back HTTP 429, daily free allocation of 10,000 neurons used up. s01–s09 stayed. The storyboard was then cut to those nine shots (E-010). Storyboard v3 put s10 back. It still has no keyframe of its own, so assembly holds the s09 clip (`outputs/shots/s10_hold9.mp4`).
 
 Assembly refuses to start if a shot has no clip, a narration wav is missing, or `music.selected_seed` has no wav. It does not substitute a silent bed.
 
