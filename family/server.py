@@ -30,6 +30,17 @@ def _dry() -> bool:
     return os.environ.get("FAMILY_DRY", "").strip().lower() in ("1", "true", "yes")
 
 
+def _page() -> bytes:
+    html = STATIC.read_text(encoding="utf-8")
+    if _dry():
+        html = html.replace(
+            "Four pictures, a few minutes, a few birr. Two films fill the free day.",
+            "This public preview paints flat frames and a quiet tone. It does not call the voice or the image service.",
+            1,
+        )
+    return html.encode()
+
+
 def _film_dir(film_id: str) -> Path:
     if not ID.fullmatch(film_id):
         raise ValueError("bad id")
@@ -142,7 +153,7 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:
         path = urlparse(self.path).path
         if path in ("/", "/index.html"):
-            self._file(STATIC, "text/html; charset=utf-8")
+            self._bytes(200, _page(), "text/html; charset=utf-8")
             return
         if path.startswith("/api/film/"):
             film_id = path.removeprefix("/api/film/")
