@@ -1,16 +1,20 @@
 # Faaruun Hin Callisu
 
-A film about an elderly mother in Dambi Doolloo and the song her son left behind. Narration is Afaan Oromo. Subtitles are English. The picture is a painted still, moved with a slow zoom, under an original instrumental score. Three clocks, and they are not the same number: the ten shot durations sum to 79 seconds; the radio cut is 82 seconds because it keeps those lengths and adds the 3-second end card; the picture exports are 90.042 seconds because each line is slowed to 0.88× and the frame holds to the voice, then the same 3-second card.
+A film about an elderly mother in Dambi Doolloo and the song her son left behind. Narration is Afaan Oromo. Subtitles are English. The picture is a painted still, moved with a slow zoom, under an original instrumental score.
 
-## The family page
+## The page
 
-A relative opens one page, answers three things, and gets a short vertical film. Nothing to install.
+Anyone can open it. Nothing to install. Three answers, and a short vertical film comes back.
 
-**https://faaruun.vercel.app**
+**https://heritage-short-beta.vercel.app/**
 
-Vercel hosts that page for free on the Hobby plan, and the deploy comes from this GitHub repository, not from a laptop. The project name is `faaruun`. The address `heritage-short.vercel.app` is a different film and is not this one. The hosted copy is a dry preview: flat frames, a quiet tone, no Addis call, no Cloudflare call. A real film, with her voice and the painted frames, is still `make family` on this machine. The keys stay in `.env`. Details are in `FAMILY.md`.
+Vercel hosts that page for free, from this repository. A push to `main` updates it. The page is called Tell them. A person writes a name and a first sentence, one object only they would remember, and a last line. The film is vertical, the English line sits on the picture, and the last card says Made with AI.
 
-One command rebuilds it from the storyboard:
+The hosted copy is the public preview. It paints flat frames and a quiet tone. It does not call Addis, and it does not call Cloudflare, so a visitor cannot spend the keys. The keys stay in `.env`. A real film, with her voice and the painted frames, is `make family` on this machine. That path is written in `FAMILY.md`.
+
+The graded film is the ten-shot cut, not this page. Three clocks, and they are not the same number: the ten shot durations sum to 79 seconds; the radio cut is 82 seconds because it keeps those lengths and adds the 3-second end card; the picture exports are 90.042 seconds because each line is slowed to 0.88× and the frame holds to the voice, then the same 3-second card.
+
+One command rebuilds the graded film from the storyboard:
 
 ```bash
 make film

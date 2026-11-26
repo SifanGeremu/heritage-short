@@ -10,7 +10,7 @@ make family
 
 Open http://127.0.0.1:8765
 
-The public preview is on Vercel, which is free, and it deploys from this GitHub repository: https://faaruun.vercel.app
+The public preview is on Vercel, which is free, and it deploys from this GitHub repository: https://heritage-short-beta.vercel.app/
 
 `FAMILY_DRY=1 make family` paints flat frames and a quiet tone, and calls no API. The public preview is that mode. A real film needs `ADDIS-AI-API-KEY`, `CLOUDFLARE_ACCOUNT_ID`, and `CLOUDFLARE_API_TOKEN` in `.env`. One film is one portrait and three frames. Two films fill the free Cloudflare day. The voice is Addis `om-ayyaantuu`, a few birr. The person is painted. There is no photo upload. The film ends with "Made with AI".
 
